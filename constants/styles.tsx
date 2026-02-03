@@ -1,0 +1,280 @@
+import { StyleSheet } from 'react-native';
+import { BorderRadius, Colors, FontSizes, Shadows, Spacing } from './theme';
+
+export const GlobalStyles = StyleSheet.create({
+    screen: {
+        flex: 1,
+        backgroundColor: Colors.light.background,
+    },
+    scrollContent: {
+        padding: Spacing[4],
+        paddingBottom: Spacing[8],
+    },
+
+    card: {
+        backgroundColor: Colors.light.card,
+        borderRadius: BorderRadius.sm,
+        padding: Spacing[4],
+        marginBottom: Spacing[4],
+        ...Shadows.sm,
+    },
+    cardSmall: {
+        backgroundColor: Colors.light.card,
+        borderRadius: BorderRadius.sm,
+        padding: Spacing[3],
+        marginBottom: Spacing[3],
+        ...Shadows.sm,
+    },
+    cardTitle: {
+        fontSize: FontSizes.lg,
+        fontWeight: '600',
+        color: Colors.neutral[800],
+        marginBottom: Spacing[3],
+    },
+
+    headerLarge: {
+        fontSize: FontSizes['2xl'],
+        fontWeight: '700',
+        color: Colors.neutral[900],
+    },
+    title: {
+        fontSize: FontSizes.base,
+        fontWeight: '600',
+        color: Colors.neutral[800],
+    },
+    subtitle: {
+        fontSize: FontSizes.sm,
+        fontWeight: '500',
+        color: Colors.neutral[600],
+    },
+    caption: {
+        fontSize: FontSizes.xs,
+        color: Colors.neutral[500],
+    },
+    emptyText: {
+        fontSize: FontSizes.sm,
+        color: Colors.neutral[500],
+        textAlign: 'center',
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: Spacing[16],
+    },
+
+    row: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    rowBetween: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    rowWrap: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: Spacing[1],
+    },
+    divider: {
+        paddingVertical: Spacing[2],
+        borderBottomWidth: 1,
+        borderBottomColor: Colors.neutral[100],
+    },
+
+    inputGroup: {
+        marginBottom: Spacing[4],
+    },
+    label: {
+        fontSize: FontSizes.sm,
+        fontWeight: '500',
+        color: Colors.neutral[700],
+        marginBottom: Spacing[1],
+    },
+    input: {
+        backgroundColor: Colors.neutral[50],
+        borderWidth: 1,
+        borderColor: Colors.neutral[300],
+        borderRadius: BorderRadius.sm,
+        paddingHorizontal: Spacing[3],
+        paddingVertical: Spacing[2.5],
+        fontSize: FontSizes.base,
+        color: Colors.neutral[800],
+    },
+    errorText: {
+        color: Colors.danger.DEFAULT,
+        fontSize: FontSizes.sm,
+        marginBottom: Spacing[2],
+    },
+
+    buttonPrimary: {
+        backgroundColor: Colors.primary.DEFAULT,
+        borderRadius: BorderRadius.sm,
+        paddingVertical: Spacing[3],
+        paddingHorizontal: Spacing[4],
+        alignItems: 'center',
+    },
+    buttonPrimaryText: {
+        color: Colors.white,
+        fontSize: FontSizes.base,
+        fontWeight: '600',
+    },
+    buttonDanger: {
+        backgroundColor: Colors.danger.light,
+        borderRadius: BorderRadius.sm,
+        paddingVertical: Spacing[2],
+        paddingHorizontal: Spacing[3],
+        alignItems: 'center',
+    },
+    buttonDangerText: {
+        color: Colors.danger.text,
+        fontSize: FontSizes.sm,
+        fontWeight: '600',
+    },
+    buttonDisabled: {
+        opacity: 0.6,
+    },
+
+    badge: {
+        backgroundColor: Colors.primary.light,
+        borderRadius: BorderRadius.sm,
+        paddingHorizontal: Spacing[2],
+        paddingVertical: Spacing[0.5],
+    },
+    badgeText: {
+        color: Colors.primary.DEFAULT,
+        fontSize: FontSizes.xs,
+        fontWeight: '600',
+        textTransform: 'uppercase',
+    },
+
+    gradeBox: {
+        width: 36,
+        height: 36,
+        borderRadius: BorderRadius.sm,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    gradeValue: {
+        fontSize: FontSizes.base,
+        fontWeight: '700',
+        color: Colors.white,
+    },
+    gradeBoxSmall: {
+        width: 28,
+        height: 28,
+        borderRadius: BorderRadius.sm,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    gradeValueSmall: {
+        fontSize: FontSizes.xs,
+        fontWeight: '700',
+        color: Colors.white,
+    },
+
+    statBox: {
+        flex: 1,
+        alignItems: 'center',
+        paddingVertical: Spacing[2],
+    },
+    statValue: {
+        fontSize: FontSizes.xl,
+        fontWeight: '700',
+        color: Colors.neutral[800],
+    },
+    statLabel: {
+        fontSize: FontSizes.xs,
+        color: Colors.neutral[500],
+        marginTop: Spacing[0.5],
+    },
+
+    progressContainer: {
+        height: 8,
+        backgroundColor: Colors.neutral[200],
+        borderRadius: BorderRadius.sm,
+        overflow: 'hidden',
+    },
+    progressBar: {
+        height: '100%',
+        borderRadius: BorderRadius.sm,
+    },
+
+    dayHeader: {
+        fontSize: FontSizes.base,
+        fontWeight: '700',
+        color: Colors.neutral[800],
+        paddingVertical: Spacing[2],
+        paddingHorizontal: Spacing[3],
+        backgroundColor: Colors.neutral[100],
+        borderRadius: BorderRadius.sm,
+        marginTop: Spacing[4],
+        marginBottom: Spacing[2],
+    },
+    lessonCard: {
+        backgroundColor: Colors.light.card,
+        borderRadius: BorderRadius.sm,
+        padding: Spacing[3],
+        marginBottom: Spacing[2],
+        flexDirection: 'row',
+        ...Shadows.sm,
+    },
+    lessonTime: {
+        width: 56,
+        marginRight: Spacing[3],
+        alignItems: 'center',
+    },
+    lessonOrder: {
+        fontSize: FontSizes.xs,
+        color: Colors.neutral[400],
+        marginBottom: Spacing[0.5],
+    },
+
+    dayButton: {
+        paddingHorizontal: Spacing[3],
+        paddingVertical: Spacing[2],
+        borderRadius: BorderRadius.sm,
+        backgroundColor: Colors.neutral[100],
+    },
+    dayButtonActive: {
+        backgroundColor: Colors.primary.DEFAULT,
+    },
+    dayButtonText: {
+        fontSize: FontSizes.sm,
+        fontWeight: '500',
+        color: Colors.neutral[600],
+    },
+    dayButtonTextActive: {
+        color: Colors.white,
+    },
+
+    progressFill: {
+        height: '100%',
+        borderRadius: BorderRadius.sm,
+        backgroundColor: Colors.primary.DEFAULT,
+    },
+
+    modalContainer: {
+        flex: 1,
+        backgroundColor: Colors.light.background,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        paddingHorizontal: Spacing[4],
+        paddingVertical: Spacing[3],
+        borderBottomWidth: 1,
+        borderBottomColor: Colors.neutral[100],
+    },
+    modalContent: {
+        flex: 1,
+        padding: Spacing[4],
+    },
+    headerMedium: {
+        fontSize: FontSizes.xl,
+        fontWeight: '700',
+        color: Colors.neutral[900],
+    },
+});
