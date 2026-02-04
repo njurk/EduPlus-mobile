@@ -120,6 +120,18 @@ export const GlobalStyles = StyleSheet.create({
         fontSize: FontSizes.base,
         fontWeight: '600',
     },
+    buttonSecondary: {
+        backgroundColor: Colors.neutral[100],
+        borderRadius: BorderRadius.sm,
+        paddingVertical: Spacing[2],
+        paddingHorizontal: Spacing[3],
+        alignItems: 'center',
+    },
+    buttonSecondaryText: {
+        color: Colors.neutral[600],
+        fontSize: FontSizes.sm,
+        fontWeight: '600',
+    },
     buttonDanger: {
         backgroundColor: Colors.danger.light,
         borderRadius: BorderRadius.sm,
@@ -255,6 +267,13 @@ export const GlobalStyles = StyleSheet.create({
         backgroundColor: Colors.primary.DEFAULT,
     },
 
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: Spacing[4],
+    },
     modalContainer: {
         flex: 1,
         backgroundColor: Colors.light.background,
@@ -269,12 +288,28 @@ export const GlobalStyles = StyleSheet.create({
         borderBottomColor: Colors.neutral[100],
     },
     modalContent: {
-        flex: 1,
-        padding: Spacing[4],
+        backgroundColor: Colors.light.card,
+        borderRadius: BorderRadius.md,
+        padding: Spacing[5],
+        width: '100%',
+        maxWidth: 400,
+        ...Shadows.md,
     },
     headerMedium: {
         fontSize: FontSizes.xl,
         fontWeight: '700',
         color: Colors.neutral[900],
+    },
+    button: {
+        backgroundColor: Colors.primary.DEFAULT,
+        borderRadius: BorderRadius.sm,
+        paddingVertical: Spacing[3],
+        paddingHorizontal: Spacing[4],
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: Colors.white,
+        fontSize: FontSizes.base,
+        fontWeight: '600',
     },
 });

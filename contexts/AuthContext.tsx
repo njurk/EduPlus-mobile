@@ -1,4 +1,4 @@
-import { authApi, User } from '@/services/api';
+import { authApi, setOnUnauthorized, User } from '@/services/api';
 import React, { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 
 interface AuthContextType {
@@ -21,6 +21,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        setOnUnauthorized(() => {
+            setToken(null);
+            setUser(null);
+        });
+    }, []);
 
     useEffect(() => {
         const loadStoredAuth = async () => {
@@ -54,8 +61,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(null);
     }, []);
 
-    const isParent = user?.roleLevel === 4;
-    const isStudent = user?.roleLevel === 5;
+    const isParent = user?.roleLevel === 3;
+    const isStudent = user?.roleLevel === 4;
 
     return (
         <AuthContext.Provider value={{ user, token, isLoading, isParent, isStudent, login, logout }}>

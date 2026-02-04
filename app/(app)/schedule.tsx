@@ -1,7 +1,8 @@
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { mobileApi, MobileScheduleDto } from '@/services/api';
-import React, { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
 import {
     RefreshControl,
     ScrollView,
@@ -27,10 +28,12 @@ export default function ScheduleScreen() {
         }
     };
 
-    useEffect(() => {
-        loadData();
-        if (selectedDay < 0) setSelectedDay(0);
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            loadData();
+            if (selectedDay < 0) setSelectedDay(0);
+        }, [])
+    );
 
     const onRefresh = async () => {
         setRefreshing(true);
@@ -42,19 +45,11 @@ export default function ScheduleScreen() {
 
     return (
         <View style={GlobalStyles.screen}>
-            <View style={{ paddingHorizontal: Spacing[4], paddingTop: Spacing[4], paddingBottom: Spacing[2] }}>
-                {schedule && (
-                    <Text style={[GlobalStyles.caption, { textAlign: 'center' }]}>
-                        Klasa {schedule.className} • {schedule.semesterName}
-                    </Text>
-                )}
-            </View>
-
-            <View style={[GlobalStyles.row, { paddingHorizontal: Spacing[4], paddingVertical: Spacing[2], gap: Spacing[2] }]}>
+            <View style={[GlobalStyles.row, { paddingHorizontal: Spacing[4], paddingVertical: Spacing[4], gap: Spacing[2] }]}>
                 {DAYS.map((day, index) => (
                     <TouchableOpacity
                         key={index}
-                        style={[GlobalStyles.dayButton, selectedDay === index && GlobalStyles.dayButtonActive]}
+                        style={[GlobalStyles.dayButton, { flex: 1 }, selectedDay === index && GlobalStyles.dayButtonActive]}
                         onPress={() => setSelectedDay(index)}
                     >
                         <Text style={[GlobalStyles.dayButtonText, selectedDay === index && GlobalStyles.dayButtonTextActive]}>
@@ -83,7 +78,7 @@ export default function ScheduleScreen() {
                             <View style={{ width: 50, alignItems: 'center', borderRightWidth: 1, borderRightColor: Colors.neutral[100], marginRight: Spacing[3], paddingRight: Spacing[3] }}>
                                 <Text style={{ fontSize: FontSizes['2xl'], fontWeight: '700', color: Colors.primary.DEFAULT }}>{lesson.orderNumber}</Text>
                                 <Text style={GlobalStyles.caption}>{lesson.startTime}</Text>
-                                <Text style={{ fontSize: FontSizes.xs, color: Colors.neutral[400] }}>{lesson.endTime}</Text>
+                                <Text style={GlobalStyles.caption}>{lesson.endTime}</Text>
                             </View>
                             <View style={{ flex: 1, justifyContent: 'center' }}>
                                 <Text style={GlobalStyles.title}>{lesson.subjectName}</Text>

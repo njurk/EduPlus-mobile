@@ -1,7 +1,10 @@
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { announcementsApi, MobileAnnouncementDto, mobileApi } from '@/services/api';
-import React, { useEffect, useState } from 'react';
+import { formatDate } from '@/utils/formatters';
+import { useFocusEffect } from '@react-navigation/native';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import {
     Modal,
     RefreshControl,
@@ -12,29 +15,11 @@ import {
 } from 'react-native';
 
 export default function AnnouncementsScreen() {
+    const { openId } = useLocalSearchParams<{ openId?: string }>();
     const [announcements, setAnnouncements] = useState<MobileAnnouncementDto[]>([]);
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<MobileAnnouncementDto | null>(null);
     const [refreshing, setRefreshing] = useState(false);
     const [loading, setLoading] = useState(true);
-
-    const loadData = async () => {
-        try {
-            const data = await mobileApi.getAnnouncements();
-            setAnnouncements(data);
-        } catch { } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        loadData();
-    }, []);
-
-    const onRefresh = async () => {
-        setRefreshing(true);
-        await loadData();
-        setRefreshing(false);
-    };
 
     const handlePress = async (announcement: MobileAnnouncementDto) => {
         setSelectedAnnouncement(announcement);
@@ -48,13 +33,33 @@ export default function AnnouncementsScreen() {
         }
     };
 
-    const formatDate = (dateStr: string) => {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('pl-PL', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-        });
+    const loadData = async () => {
+        try {
+            const data = await mobileApi.getAnnouncements();
+            setAnnouncements(data);
+
+            if (openId) {
+                const announcement = data.find(a => a.id === Number(openId));
+                if (announcement) {
+                    handlePress(announcement);
+                }
+                router.setParams({ openId: undefined });
+            }
+        } catch { } finally {
+            setLoading(false);
+        }
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            loadData();
+        }, [openId])
+    );
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await loadData();
+        setRefreshing(false);
     };
 
     return (

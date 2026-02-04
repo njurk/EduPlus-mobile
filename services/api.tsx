@@ -1,7 +1,8 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-export const API_URL = 'http://10.0.2.2:5107/api';
+export const BASE_URL = 'http://192.168.88.89:5107';
+export const API_URL = `${BASE_URL}/api`;
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
@@ -9,14 +10,16 @@ const USER_KEY = 'auth_user';
 export interface User {
     id: number;
     email: string;
-    firstName: string;
-    lastName: string;
+    name: string;
     roleLevel: number;
 }
 
-export interface LoginResponse {
+interface BackendLoginResponse {
     token: string;
-    user: User;
+    userId: number;
+    userEmail: string;
+    userName: string;
+    maxRoleLevel: number;
 }
 
 interface MobileLessonDto {
@@ -38,11 +41,13 @@ export interface MobileScheduleDto {
 }
 
 interface MobileGradeDto {
+    id: number;
     value: string;
     categoryName: string;
     categoryColorHex: string;
     teacherName: string;
     comment: string | null;
+    weight: number;
     createdAt: string;
 }
 
@@ -53,8 +58,22 @@ export interface MobileSubjectGradesDto {
     grades: MobileGradeDto[];
 }
 
+export interface MobileRecentGradeDto {
+    id: number;
+    subjectName: string;
+    value: string;
+    categoryName: string;
+    categoryColorHex: string;
+    teacherName: string;
+    comment: string | null;
+    weight: number;
+    date: string;
+    createdAt: string;
+}
+
 export interface MobileGradesDto {
     subjects: MobileSubjectGradesDto[];
+    recentGrades: MobileRecentGradeDto[];
 }
 
 export interface MobileSubjectAttendanceDto {
@@ -67,8 +86,16 @@ export interface MobileSubjectAttendanceDto {
     attendancePercentage: number;
 }
 
+export interface MobileAttendanceRecordDto {
+    subjectName: string;
+    date: string;
+    type: string;
+    typeColorHex: string;
+}
+
 export interface MobileAttendanceDto {
     subjects: MobileSubjectAttendanceDto[];
+    recentRecords: MobileAttendanceRecordDto[];
 }
 
 export interface MobileAnnouncementDto {
@@ -87,6 +114,9 @@ async function getStoredToken(): Promise<string | null> {
 }
 
 async function storeToken(token: string): Promise<void> {
+    if (typeof token !== 'string' || !token) {
+        throw new Error('Token jest nieprawidłowy');
+    }
     if (Platform.OS === 'web') {
         localStorage.setItem(TOKEN_KEY, token);
         return;
@@ -103,7 +133,11 @@ async function removeToken(): Promise<void> {
 }
 
 async function storeUser(user: User): Promise<void> {
+    if (!user) return;
     const json = JSON.stringify(user);
+    if (typeof json !== 'string' || !json) {
+        throw new Error('Nie udało się zapisać użytkownika');
+    }
     if (Platform.OS === 'web') {
         localStorage.setItem(USER_KEY, json);
         return;
@@ -138,7 +172,21 @@ async function getHeaders(): Promise<Record<string, string>> {
     };
 }
 
+let onUnauthorizedCallback: (() => void) | null = null;
+
+export function setOnUnauthorized(callback: () => void) {
+    onUnauthorizedCallback = callback;
+}
+
 async function handleResponse<T>(response: Response): Promise<T | null> {
+    if (response.status === 401) {
+        await removeToken();
+        await removeUser();
+        if (onUnauthorizedCallback) {
+            onUnauthorizedCallback();
+        }
+        throw new Error('Sesja wygasła. Zaloguj się ponownie.');
+    }
     if (!response.ok) {
         const text = await response.text();
         throw new Error(text || `HTTP ${response.status}`);
@@ -148,17 +196,29 @@ async function handleResponse<T>(response: Response): Promise<T | null> {
 }
 
 export const authApi = {
-    async loginMobile(email: string, password: string): Promise<LoginResponse> {
+    async loginMobile(email: string, password: string): Promise<{ token: string; user: User }> {
         const response = await fetch(`${API_URL}/auth/login/mobile`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password }),
         });
-        const data = await handleResponse<LoginResponse>(response);
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text || 'Nieprawidłowy email lub hasło');
+        }
+        const text = await response.text();
+        const data: BackendLoginResponse | null = text ? JSON.parse(text) : null;
         if (!data) throw new Error('Nieprawidłowa odpowiedź serwera');
-        await storeToken(data.token);
-        await storeUser(data.user);
-        return data;
+        const tokenString = typeof data.token === 'string' ? data.token : String(data.token);
+        const user: User = {
+            id: data.userId,
+            email: data.userEmail,
+            name: data.userName,
+            roleLevel: data.maxRoleLevel,
+        };
+        await storeToken(tokenString);
+        await storeUser(user);
+        return { token: tokenString, user };
     },
 
     async logout(): Promise<void> {
@@ -200,7 +260,7 @@ export const mobileApi = {
         const params = semesterId ? `?semesterId=${semesterId}` : '';
         const response = await fetch(`${API_URL}/mobile/grades${params}`, { headers });
         const data = await handleResponse<MobileGradesDto>(response);
-        return data ?? { subjects: [] };
+        return data ?? { subjects: [], recentGrades: [] };
     },
 
     async getAttendance(semesterId?: number): Promise<MobileAttendanceDto> {
@@ -208,7 +268,7 @@ export const mobileApi = {
         const params = semesterId ? `?semesterId=${semesterId}` : '';
         const response = await fetch(`${API_URL}/mobile/attendance${params}`, { headers });
         const data = await handleResponse<MobileAttendanceDto>(response);
-        return data ?? { subjects: [] };
+        return data ?? { subjects: [], recentRecords: [] };
     },
 
     async getAnnouncements(): Promise<MobileAnnouncementDto[]> {
@@ -266,5 +326,51 @@ export const cmsApi = {
             acc[item.key] = item.value;
             return acc;
         }, {} as Record<string, string>);
+    },
+};
+
+export interface UserProfile {
+    id: number;
+    email: string;
+    firstName: string;
+    lastName: string;
+    phone: string | null;
+    street: string | null;
+    city: string | null;
+    postalCode: string | null;
+}
+
+export interface ChangePasswordDto {
+    currentPassword: string;
+    newPassword: string;
+}
+
+export const usersApi = {
+    async get(id: number): Promise<UserProfile> {
+        const headers = await getHeaders();
+        const response = await fetch(`${API_URL}/user/${id}`, { headers });
+        const data = await handleResponse<UserProfile>(response);
+        if (!data) throw new Error('Nie udało się pobrać danych użytkownika');
+        return data;
+    },
+
+    async update(id: number, data: Partial<UserProfile>): Promise<void> {
+        const headers = await getHeaders();
+        const response = await fetch(`${API_URL}/user/${id}`, {
+            method: 'PUT',
+            headers,
+            body: JSON.stringify(data),
+        });
+        await handleResponse(response);
+    },
+
+    async changePassword(id: number, data: ChangePasswordDto): Promise<void> {
+        const headers = await getHeaders();
+        const response = await fetch(`${API_URL}/user/${id}/change-password`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(data),
+        });
+        await handleResponse(response);
     },
 };

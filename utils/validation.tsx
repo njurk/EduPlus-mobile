@@ -75,3 +75,63 @@ export const validatePasswordResetForm = (email: string): Record<string, string>
 
     return errors;
 };
+
+export const getPasswordErrors = (password: string): string[] => {
+    return PASSWORD_RULES
+        .filter(rule => !rule.test(password))
+        .map(rule => rule.label);
+};
+
+export const validatePasswordChange = (
+    currentPassword: string,
+    newPassword: string,
+    confirmPassword: string
+): Record<string, string> => {
+    const errors: Record<string, string> = {};
+
+    if (!currentPassword) {
+        errors.currentPassword = "Aktualne hasło jest wymagane";
+    }
+
+    if (!newPassword) {
+        errors.newPassword = "Nowe hasło jest wymagane";
+    } else if (!isPasswordValid(newPassword)) {
+        const failedRules = getPasswordErrors(newPassword);
+        errors.newPassword = `Hasło nie spełnia wymogów: ${failedRules.join(', ')}`;
+    }
+
+    if (!confirmPassword) {
+        errors.confirmPassword = "Potwierdzenie hasła jest wymagane";
+    } else if (newPassword !== confirmPassword) {
+        errors.confirmPassword = "Hasła nie są identyczne";
+    }
+
+    return errors;
+};
+
+export const validateProfileForm = (profile: {
+    firstName?: string;
+    lastName?: string;
+    phone?: string | null;
+    postalCode?: string | null;
+}): Record<string, string> => {
+    const errors: Record<string, string> = {};
+
+    if (!profile.firstName?.trim()) {
+        errors.firstName = "Imię jest wymagane";
+    }
+
+    if (!profile.lastName?.trim()) {
+        errors.lastName = "Nazwisko jest wymagane";
+    }
+
+    if (profile.phone && !REGEX.PHONE.test(profile.phone)) {
+        errors.phone = "Niedozwolone znaki w numerze telefonu";
+    }
+
+    if (profile.postalCode && !REGEX.POSTAL_CODE.test(profile.postalCode)) {
+        errors.postalCode = "Wymagany format: XX-XXX";
+    }
+
+    return errors;
+};

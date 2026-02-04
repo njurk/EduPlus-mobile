@@ -2,9 +2,9 @@ import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useCMSContent } from '@/hooks/useCMSContent';
 import { TicketReason, ticketsApi } from '@/services/api';
-import { isValidEmail } from '@/utils/validation';
-import { Ionicons } from '@expo/vector-icons';
+import { validateTicketForm } from '@/utils/validation';
 import { router } from 'expo-router';
+import { ChevronDown } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
@@ -26,7 +26,8 @@ export default function SubmitTicketScreen() {
     const [reasons, setReasons] = useState<TicketReason[]>([]);
     const [selectedReasonId, setSelectedReasonId] = useState<number | null>(null);
     const [showReasonPicker, setShowReasonPicker] = useState(false);
-    const [error, setError] = useState('');
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [apiError, setApiError] = useState('');
     const [success, setSuccess] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingReasons, setIsLoadingReasons] = useState(true);
@@ -34,6 +35,11 @@ export default function SubmitTicketScreen() {
     useEffect(() => {
         loadReasons();
     }, []);
+
+    useEffect(() => {
+        const newErrors = validateTicketForm(email, description, selectedReasonId);
+        setErrors(newErrors);
+    }, [email, description, selectedReasonId]);
 
     const loadReasons = async () => {
         try {
@@ -43,7 +49,7 @@ export default function SubmitTicketScreen() {
                 setSelectedReasonId(data[0].id);
             }
         } catch {
-            setError('Nie udało się pobrać listy powodów');
+            setApiError('Nie udało się pobrać listy powodów');
         } finally {
             setIsLoadingReasons(false);
         }
@@ -52,25 +58,18 @@ export default function SubmitTicketScreen() {
     const selectedReason = reasons.find(r => r.id === selectedReasonId);
 
     const handleSubmit = async () => {
-        if (!email || !description) {
-            setError('Wypełnij wszystkie pola');
+        const validationErrors = validateTicketForm(email, description, selectedReasonId);
+        if (Object.keys(validationErrors).length > 0) {
             return;
         }
-        if (!isValidEmail(email)) {
-            setError('Wprowadź poprawny adres email');
-            return;
-        }
-        if (!selectedReasonId) {
-            setError('Wybierz powód zgłoszenia');
-            return;
-        }
-        setError('');
+
+        setApiError('');
         setIsLoading(true);
         try {
-            await ticketsApi.createAnonymous({ email, content: description, reasonId: selectedReasonId });
+            await ticketsApi.createAnonymous({ email, content: description, reasonId: selectedReasonId! });
             setSuccess(true);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Nie udało się wysłać zgłoszenia');
+            setApiError(err instanceof Error ? err.message : 'Nie udało się wysłać zgłoszenia');
         } finally {
             setIsLoading(false);
         }
@@ -116,8 +115,8 @@ export default function SubmitTicketScreen() {
                     <View style={GlobalStyles.inputGroup}>
                         <Text style={GlobalStyles.label}>Email kontaktowy</Text>
                         <TextInput
-                            style={GlobalStyles.input}
-                            placeholder="jan.kowalski@example.com"
+                            style={[GlobalStyles.input, email.length > 0 && errors.email && { borderColor: Colors.danger.DEFAULT }]}
+                            placeholder="example@gmail.com"
                             placeholderTextColor={Colors.neutral[400]}
                             value={email}
                             onChangeText={setEmail}
@@ -125,6 +124,7 @@ export default function SubmitTicketScreen() {
                             autoCapitalize="none"
                             autoComplete="email"
                         />
+                        {email.length > 0 && errors.email && <Text style={GlobalStyles.errorText}>{errors.email}</Text>}
                     </View>
 
                     <View style={GlobalStyles.inputGroup}>
@@ -141,7 +141,7 @@ export default function SubmitTicketScreen() {
                                 <Text style={{ color: selectedReason ? Colors.neutral[800] : Colors.neutral[400], fontSize: FontSizes.base }}>
                                     {selectedReason?.name || 'Wybierz powód...'}
                                 </Text>
-                                <Ionicons name="chevron-down" size={20} color={Colors.neutral[400]} />
+                                <ChevronDown size={20} color={Colors.neutral[400]} />
                             </TouchableOpacity>
                         )}
                     </View>
@@ -149,7 +149,7 @@ export default function SubmitTicketScreen() {
                     <View style={GlobalStyles.inputGroup}>
                         <Text style={GlobalStyles.label}>{getText('form.description', 'Opis problemu')}</Text>
                         <TextInput
-                            style={[GlobalStyles.input, { height: 120, textAlignVertical: 'top' }]}
+                            style={[GlobalStyles.input, { height: 120, textAlignVertical: 'top' }, description.length > 0 && errors.content && { borderColor: Colors.danger.DEFAULT }]}
                             placeholder={getText('form.descriptionPlaceholder', 'Opisz szczegółowo problem...')}
                             placeholderTextColor={Colors.neutral[400]}
                             value={description}
@@ -157,9 +157,10 @@ export default function SubmitTicketScreen() {
                             multiline
                             numberOfLines={5}
                         />
+                        {description.length > 0 && errors.content && <Text style={GlobalStyles.errorText}>{errors.content}</Text>}
                     </View>
 
-                    {error ? <Text style={GlobalStyles.errorText}>{error}</Text> : null}
+                    {apiError ? <Text style={GlobalStyles.errorText}>{apiError}</Text> : null}
 
                     <TouchableOpacity
                         style={[GlobalStyles.buttonPrimary, isLoading && GlobalStyles.buttonDisabled]}

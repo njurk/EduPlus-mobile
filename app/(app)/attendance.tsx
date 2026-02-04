@@ -1,7 +1,8 @@
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { mobileApi, MobileSubjectAttendanceDto } from '@/services/api';
-import React, { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
 import {
     RefreshControl,
     ScrollView,
@@ -23,9 +24,11 @@ export default function AttendanceScreen() {
         }
     };
 
-    useEffect(() => {
-        loadData();
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            loadData();
+        }, [])
+    );
 
     const onRefresh = async () => {
         setRefreshing(true);

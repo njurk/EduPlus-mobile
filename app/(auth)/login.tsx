@@ -2,10 +2,10 @@ import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Shadows, Spacing } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCMSContent } from '@/hooks/useCMSContent';
-import { API_URL } from '@/services/api';
-import { isValidEmail } from '@/utils/validation';
+import { BASE_URL } from '@/services/api';
+import { validateLoginForm } from '@/utils/validation';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Image,
@@ -24,27 +24,29 @@ export default function LoginScreen() {
     const { getText: getResetText } = useCMSContent('resetPassword');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [apiError, setApiError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const logoUrl = getSystemText('faviconUrl', 'logo-64.png');
-    const baseUrl = API_URL.replace('/api', '');
+    const logoUrl = `${BASE_URL}/${getSystemText('logoUrl', 'logo-512.png')}`;
+
+    useEffect(() => {
+        const newErrors = validateLoginForm(email, password);
+        setErrors(newErrors);
+    }, [email, password]);
 
     const handleLogin = async () => {
-        if (!email || !password) {
-            setError('Wprowadź email i hasło');
+        const validationErrors = validateLoginForm(email, password);
+        if (Object.keys(validationErrors).length > 0) {
             return;
         }
-        if (!isValidEmail(email)) {
-            setError('Wprowadź poprawny adres email');
-            return;
-        }
-        setError('');
+
+        setApiError('');
         setIsLoading(true);
         try {
             await login(email, password);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Nie udało się zalogować');
+            setApiError(err instanceof Error ? err.message : 'Nie udało się zalogować');
         } finally {
             setIsLoading(false);
         }
@@ -58,7 +60,7 @@ export default function LoginScreen() {
             <View style={{ flex: 1, justifyContent: 'center', padding: Spacing[6] }}>
                 <View style={{ alignItems: 'center', marginBottom: Spacing[8] }}>
                     <Image
-                        source={{ uri: `${baseUrl}/${logoUrl}` }}
+                        source={{ uri: logoUrl }}
                         style={{ width: 80, height: 80, marginBottom: Spacing[4] }}
                         resizeMode="contain"
                     />
@@ -72,8 +74,8 @@ export default function LoginScreen() {
                     <View style={GlobalStyles.inputGroup}>
                         <Text style={GlobalStyles.label}>Email</Text>
                         <TextInput
-                            style={GlobalStyles.input}
-                            placeholder="jan.kowalski@example.com"
+                            style={[GlobalStyles.input, email.length > 0 && errors.email && { borderColor: Colors.danger.DEFAULT }]}
+                            placeholder="example@gmail.com"
                             placeholderTextColor={Colors.neutral[400]}
                             value={email}
                             onChangeText={setEmail}
@@ -81,12 +83,13 @@ export default function LoginScreen() {
                             autoCapitalize="none"
                             autoComplete="email"
                         />
+                        {email.length > 0 && errors.email && <Text style={GlobalStyles.errorText}>{errors.email}</Text>}
                     </View>
 
                     <View style={GlobalStyles.inputGroup}>
                         <Text style={GlobalStyles.label}>Hasło</Text>
                         <TextInput
-                            style={GlobalStyles.input}
+                            style={[GlobalStyles.input, password.length > 0 && errors.password && { borderColor: Colors.danger.DEFAULT }]}
                             placeholder="••••••••"
                             placeholderTextColor={Colors.neutral[400]}
                             value={password}
@@ -94,9 +97,10 @@ export default function LoginScreen() {
                             secureTextEntry
                             autoComplete="password"
                         />
+                        {password.length > 0 && errors.password && <Text style={GlobalStyles.errorText}>{errors.password}</Text>}
                     </View>
 
-                    {error ? <Text style={GlobalStyles.errorText}>{error}</Text> : null}
+                    {apiError ? <Text style={GlobalStyles.errorText}>{apiError}</Text> : null}
 
                     <TouchableOpacity
                         style={[GlobalStyles.buttonPrimary, isLoading && GlobalStyles.buttonDisabled, { marginTop: Spacing[2] }]}

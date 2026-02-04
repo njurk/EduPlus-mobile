@@ -2,9 +2,9 @@ import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useCMSContent } from '@/hooks/useCMSContent';
 import { authApi } from '@/services/api';
-import { isValidEmail } from '@/utils/validation';
+import { validatePasswordResetForm } from '@/utils/validation';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     KeyboardAvoidingView,
@@ -18,26 +18,29 @@ import {
 export default function ForgotPasswordScreen() {
     const { getText } = useCMSContent('resetPassword');
     const [email, setEmail] = useState('');
-    const [error, setError] = useState('');
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [apiError, setApiError] = useState('');
     const [success, setSuccess] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
+    useEffect(() => {
+        const newErrors = validatePasswordResetForm(email);
+        setErrors(newErrors);
+    }, [email]);
+
     const handleSubmit = async () => {
-        if (!email) {
-            setError('Wprowadź adres email');
+        const validationErrors = validatePasswordResetForm(email);
+        if (Object.keys(validationErrors).length > 0) {
             return;
         }
-        if (!isValidEmail(email)) {
-            setError('Wprowadź poprawny adres email');
-            return;
-        }
-        setError('');
+
+        setApiError('');
         setIsLoading(true);
         try {
             await authApi.requestPasswordReset(email);
             setSuccess(true);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Nie udało się wysłać emaila');
+            setApiError(err instanceof Error ? err.message : 'Nie udało się wysłać emaila');
         } finally {
             setIsLoading(false);
         }
@@ -86,7 +89,7 @@ export default function ForgotPasswordScreen() {
                     <View style={GlobalStyles.inputGroup}>
                         <Text style={GlobalStyles.label}>Email</Text>
                         <TextInput
-                            style={GlobalStyles.input}
+                            style={[GlobalStyles.input, email.length > 0 && errors.email && { borderColor: Colors.danger.DEFAULT }]}
                             placeholder="example@gmail.com"
                             placeholderTextColor={Colors.neutral[400]}
                             value={email}
@@ -95,9 +98,10 @@ export default function ForgotPasswordScreen() {
                             autoCapitalize="none"
                             autoComplete="email"
                         />
+                        {email.length > 0 && errors.email && <Text style={GlobalStyles.errorText}>{errors.email}</Text>}
                     </View>
 
-                    {error ? <Text style={GlobalStyles.errorText}>{error}</Text> : null}
+                    {apiError ? <Text style={GlobalStyles.errorText}>{apiError}</Text> : null}
 
                     <TouchableOpacity
                         style={[GlobalStyles.buttonPrimary, isLoading && GlobalStyles.buttonDisabled]}

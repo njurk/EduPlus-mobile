@@ -57,13 +57,13 @@ export const Fonts = Platform.select({
 });
 
 export const FontSizes = {
-  xs: 12,
-  sm: 14,
-  base: 16,
-  lg: 18,
-  xl: 20,
-  '2xl': 24,
-  '3xl': 30,
+  xs: 16,
+  sm: 18,
+  base: 20,
+  lg: 22,
+  xl: 24,
+  '2xl': 26,
+  '3xl': 32,
 };
 
 export const FontWeights: Record<string, TextStyle['fontWeight']> = {
