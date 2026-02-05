@@ -12,6 +12,7 @@ export interface User {
     email: string;
     name: string;
     roleLevel: number;
+    studentName?: string;
 }
 
 interface BackendLoginResponse {
@@ -20,6 +21,7 @@ interface BackendLoginResponse {
     userEmail: string;
     userName: string;
     maxRoleLevel: number;
+    studentName?: string;
 }
 
 interface MobileLessonDto {
@@ -93,17 +95,67 @@ export interface MobileAttendanceRecordDto {
     typeColorHex: string;
 }
 
+export interface MobileDailyLessonDto {
+    lessonOrder: number;
+    startTime: string;
+    endTime: string;
+    subjectName: string;
+    attendanceType: string | null;
+    attendanceTypeColorHex: string | null;
+}
+
+export interface MobileAttendanceStatDto {
+    shortCode: string;
+    name: string;
+    colorHex: string;
+    count: number;
+    isNegative: boolean;
+}
+
 export interface MobileAttendanceDto {
     subjects: MobileSubjectAttendanceDto[];
     recentRecords: MobileAttendanceRecordDto[];
+    dailyLessons: MobileDailyLessonDto[];
+    stats: MobileAttendanceStatDto[];
+    totalLessons: number;
 }
 
 export interface MobileAnnouncementDto {
     id: number;
     title: string;
     content: string;
+    authorName: string;
     createdAt: string;
+    updatedAt: string | null;
     isRead: boolean;
+}
+
+export interface MobileNegativeAttendanceDto {
+    id: number;
+    date: string;
+    subjectName: string;
+    lessonHour: number;
+    attendanceType: string;
+    attendanceTypeColorHex: string;
+}
+
+export interface CreateMobileExcuseDto {
+    attendanceIds: number[];
+    reason: string;
+}
+
+export interface MobileSemesterDto {
+    id: number;
+    name: string;
+    startDate: string;
+    endDate: string;
+    isCurrent: boolean;
+}
+
+export interface MobileChildDto {
+    id: number;
+    name: string;
+    className: string | null;
 }
 
 async function getStoredToken(): Promise<string | null> {
@@ -215,6 +267,7 @@ export const authApi = {
             email: data.userEmail,
             name: data.userName,
             roleLevel: data.maxRoleLevel,
+            studentName: data.studentName,
         };
         await storeToken(tokenString);
         await storeUser(user);
@@ -248,27 +301,42 @@ export const authApi = {
 };
 
 export const mobileApi = {
-    async getSchedule(): Promise<MobileScheduleDto | null> {
+    async getChildren(): Promise<MobileChildDto[]> {
         const headers = await getHeaders();
-        const response = await fetch(`${API_URL}/mobile/schedule`, { headers });
+        const response = await fetch(`${API_URL}/mobile/children`, { headers });
+        const data = await handleResponse<MobileChildDto[]>(response);
+        return data ?? [];
+    },
+
+    async getSchedule(studentId?: number): Promise<MobileScheduleDto | null> {
+        const headers = await getHeaders();
+        const params = studentId ? `?studentId=${studentId}` : '';
+        const response = await fetch(`${API_URL}/mobile/schedule${params}`, { headers });
         if (response.status === 404) return null;
         return handleResponse<MobileScheduleDto>(response);
     },
 
-    async getGrades(semesterId?: number): Promise<MobileGradesDto> {
+    async getGrades(studentId?: number, semesterId?: number): Promise<MobileGradesDto> {
         const headers = await getHeaders();
-        const params = semesterId ? `?semesterId=${semesterId}` : '';
-        const response = await fetch(`${API_URL}/mobile/grades${params}`, { headers });
+        const params = new URLSearchParams();
+        if (studentId) params.append('studentId', studentId.toString());
+        if (semesterId) params.append('semesterId', semesterId.toString());
+        const qs = params.toString() ? `?${params.toString()}` : '';
+        const response = await fetch(`${API_URL}/mobile/grades${qs}`, { headers });
         const data = await handleResponse<MobileGradesDto>(response);
         return data ?? { subjects: [], recentGrades: [] };
     },
 
-    async getAttendance(semesterId?: number): Promise<MobileAttendanceDto> {
+    async getAttendance(studentId?: number, semesterId?: number, date?: string): Promise<MobileAttendanceDto> {
         const headers = await getHeaders();
-        const params = semesterId ? `?semesterId=${semesterId}` : '';
-        const response = await fetch(`${API_URL}/mobile/attendance${params}`, { headers });
+        const params = new URLSearchParams();
+        if (studentId) params.append('studentId', studentId.toString());
+        if (semesterId) params.append('semesterId', semesterId.toString());
+        if (date) params.append('date', date);
+        const qs = params.toString() ? `?${params.toString()}` : '';
+        const response = await fetch(`${API_URL}/mobile/attendance${qs}`, { headers });
         const data = await handleResponse<MobileAttendanceDto>(response);
-        return data ?? { subjects: [], recentRecords: [] };
+        return data ?? { subjects: [], recentRecords: [], dailyLessons: [], stats: [], totalLessons: 0 };
     },
 
     async getAnnouncements(): Promise<MobileAnnouncementDto[]> {
@@ -276,6 +344,35 @@ export const mobileApi = {
         const response = await fetch(`${API_URL}/mobile/announcements`, { headers });
         const data = await handleResponse<MobileAnnouncementDto[]>(response);
         return data ?? [];
+    },
+
+    async getNegativeAttendances(studentId?: number, semesterId?: number): Promise<MobileNegativeAttendanceDto[]> {
+        const headers = await getHeaders();
+        const params = new URLSearchParams();
+        if (studentId) params.append('studentId', studentId.toString());
+        if (semesterId) params.append('semesterId', semesterId.toString());
+        const qs = params.toString() ? `?${params.toString()}` : '';
+        const response = await fetch(`${API_URL}/mobile/negative-attendances${qs}`, { headers });
+        const data = await handleResponse<MobileNegativeAttendanceDto[]>(response);
+        return data ?? [];
+    },
+
+    async getSemesters(): Promise<MobileSemesterDto[]> {
+        const headers = await getHeaders();
+        const response = await fetch(`${API_URL}/mobile/semesters`, { headers });
+        const data = await handleResponse<MobileSemesterDto[]>(response);
+        return data ?? [];
+    },
+
+    async createExcuse(studentId: number | undefined, dto: CreateMobileExcuseDto): Promise<void> {
+        const headers = await getHeaders();
+        const params = studentId ? `?studentId=${studentId}` : '';
+        const response = await fetch(`${API_URL}/mobile/excuse${params}`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(dto),
+        });
+        await handleResponse(response);
     },
 };
 

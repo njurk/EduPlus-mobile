@@ -51,6 +51,11 @@ export const GlobalStyles = StyleSheet.create({
         fontSize: FontSizes.xs,
         color: Colors.neutral[500],
     },
+    sectionTitle: {
+        fontSize: FontSizes.base,
+        fontWeight: '600',
+        color: Colors.neutral[700],
+    },
     emptyText: {
         fontSize: FontSizes.sm,
         color: Colors.neutral[500],
@@ -162,28 +167,29 @@ export const GlobalStyles = StyleSheet.create({
     },
 
     gradeBox: {
-        width: 36,
-        height: 36,
-        borderRadius: BorderRadius.sm,
+        width: 34,
+        height: 34,
+        borderRadius: 3,
         justifyContent: 'center',
         alignItems: 'center',
     },
     gradeValue: {
-        fontSize: FontSizes.base,
+        fontSize: FontSizes.sm,
         fontWeight: '700',
         color: Colors.white,
     },
-    gradeBoxSmall: {
-        width: 28,
-        height: 28,
-        borderRadius: BorderRadius.sm,
-        justifyContent: 'center',
+
+    attendanceBadge: {
+        width: 34,
+        height: 34,
+        borderRadius: 3,
         alignItems: 'center',
+        justifyContent: 'center',
     },
-    gradeValueSmall: {
-        fontSize: FontSizes.xs,
-        fontWeight: '700',
+    attendanceBadgeText: {
         color: Colors.white,
+        fontSize: FontSizes.xs,
+        fontWeight: '600',
     },
 
     statBox: {

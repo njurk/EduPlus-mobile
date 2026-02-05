@@ -75,7 +75,7 @@ export default function LoginScreen() {
                         <Text style={GlobalStyles.label}>Email</Text>
                         <TextInput
                             style={[GlobalStyles.input, email.length > 0 && errors.email && { borderColor: Colors.danger.DEFAULT }]}
-                            placeholder="example@gmail.com"
+                            placeholder="jankowalski@gmail.com"
                             placeholderTextColor={Colors.neutral[400]}
                             value={email}
                             onChangeText={setEmail}

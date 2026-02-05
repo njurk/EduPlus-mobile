@@ -1,6 +1,8 @@
+import StudentPicker from '@/components/StudentPicker';
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
+import { useStudent } from '@/contexts/StudentContext';
 import { MobileAnnouncementDto, mobileApi, MobileAttendanceRecordDto, MobileRecentGradeDto, MobileScheduleDto } from '@/services/api';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
@@ -17,6 +19,7 @@ const DAY_NAMES = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek',
 
 export default function DashboardScreen() {
     const { user } = useAuth();
+    const { selectedStudent, hasMultipleChildren } = useStudent();
     const [recentGrades, setRecentGrades] = useState<MobileRecentGradeDto[]>([]);
     const [announcements, setAnnouncements] = useState<MobileAnnouncementDto[]>([]);
     const [todayLessons, setTodayLessons] = useState<MobileScheduleDto['lessons']>([]);
@@ -25,11 +28,12 @@ export default function DashboardScreen() {
 
     const loadData = async () => {
         try {
+            const studentId = selectedStudent?.id;
             const [gradesData, announcementsData, scheduleData, attendanceData] = await Promise.all([
-                mobileApi.getGrades(),
+                mobileApi.getGrades(studentId),
                 mobileApi.getAnnouncements(),
-                mobileApi.getSchedule(),
-                mobileApi.getAttendance(),
+                mobileApi.getSchedule(studentId),
+                mobileApi.getAttendance(studentId),
             ]);
 
             setRecentGrades(gradesData?.recentGrades?.slice(0, 3) || []);
@@ -49,7 +53,7 @@ export default function DashboardScreen() {
     useFocusEffect(
         useCallback(() => {
             loadData();
-        }, [])
+        }, [selectedStudent])
     );
 
     const onRefresh = async () => {
@@ -66,6 +70,11 @@ export default function DashboardScreen() {
         >
             <View style={{ marginBottom: Spacing[6] }}>
                 <Text style={GlobalStyles.headerLarge}>Witaj, {user?.name}!</Text>
+                {hasMultipleChildren ? (
+                    <StudentPicker />
+                ) : user?.studentName && (
+                    <Text style={[GlobalStyles.subtitle, { marginTop: Spacing[1] }]}>Uczeń: {user.studentName}</Text>
+                )}
             </View>
 
             <View style={GlobalStyles.card}>
@@ -88,32 +97,6 @@ export default function DashboardScreen() {
             </View>
 
             <View style={GlobalStyles.card}>
-                <Text style={GlobalStyles.cardTitle}>Ostatnia frekwencja</Text>
-                {recentAttendance.length === 0 ? (
-                    <Text style={GlobalStyles.emptyText}>Brak danych o frekwencji</Text>
-                ) : (
-                    recentAttendance.map((record, index) => (
-                        <View key={index} style={[GlobalStyles.rowBetween, GlobalStyles.divider]}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing[3] }}>
-                                <View style={{
-                                    width: 28,
-                                    height: 28,
-                                    borderRadius: 6,
-                                    backgroundColor: record.typeColorHex || Colors.neutral[200],
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>
-                                    <Text style={{ color: '#fff', fontSize: FontSizes.xs, fontWeight: '600' }}>{record.type}</Text>
-                                </View>
-                                <Text style={GlobalStyles.subtitle}>{record.subjectName}</Text>
-                            </View>
-                            <Text style={{ fontSize: FontSizes.xs, color: Colors.neutral[400] }}>{record.date}</Text>
-                        </View>
-                    ))
-                )}
-            </View>
-
-            <View style={GlobalStyles.card}>
                 <Text style={GlobalStyles.cardTitle}>Ostatnie oceny</Text>
                 {recentGrades.length === 0 ? (
                     <Text style={GlobalStyles.emptyText}>Brak ocen do wyświetlenia</Text>
@@ -126,13 +109,32 @@ export default function DashboardScreen() {
                             activeOpacity={0.7}
                         >
                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing[3] }}>
-                                <View style={[GlobalStyles.gradeBoxSmall, { backgroundColor: grade.categoryColorHex || Colors.neutral[200] }]}>
-                                    <Text style={GlobalStyles.gradeValueSmall}>{grade.value}</Text>
+                                <View style={[GlobalStyles.gradeBox, { backgroundColor: grade.categoryColorHex || Colors.neutral[200] }]}>
+                                    <Text style={GlobalStyles.gradeValue}>{grade.value}</Text>
                                 </View>
                                 <Text style={GlobalStyles.subtitle}>{grade.subjectName}</Text>
                             </View>
                             <Text style={{ fontSize: FontSizes.xs, color: Colors.neutral[400] }}>{grade.date}</Text>
                         </TouchableOpacity>
+                    ))
+                )}
+            </View>
+
+            <View style={GlobalStyles.card}>
+                <Text style={GlobalStyles.cardTitle}>Ostatnia frekwencja</Text>
+                {recentAttendance.length === 0 ? (
+                    <Text style={GlobalStyles.emptyText}>Brak danych o frekwencji</Text>
+                ) : (
+                    recentAttendance.map((record, index) => (
+                        <View key={index} style={[GlobalStyles.rowBetween, GlobalStyles.divider]}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing[3] }}>
+                                <View style={[GlobalStyles.attendanceBadge, { backgroundColor: record.typeColorHex || Colors.neutral[200] }]}>
+                                    <Text style={GlobalStyles.attendanceBadgeText}>{record.type}</Text>
+                                </View>
+                                <Text style={GlobalStyles.subtitle}>{record.subjectName}</Text>
+                            </View>
+                            <Text style={{ fontSize: FontSizes.xs, color: Colors.neutral[400] }}>{record.date}</Text>
+                        </View>
                     ))
                 )}
             </View>

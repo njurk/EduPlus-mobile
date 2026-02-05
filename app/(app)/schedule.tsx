@@ -1,5 +1,6 @@
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
+import { useStudent } from '@/contexts/StudentContext';
 import { mobileApi, MobileScheduleDto } from '@/services/api';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
@@ -11,9 +12,10 @@ import {
     View,
 } from 'react-native';
 
-const DAYS = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek'];
+const DAYS = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt'];
 
 export default function ScheduleScreen() {
+    const { selectedStudent } = useStudent();
     const [schedule, setSchedule] = useState<MobileScheduleDto | null>(null);
     const [selectedDay, setSelectedDay] = useState(Math.min(new Date().getDay() - 1, 4));
     const [refreshing, setRefreshing] = useState(false);
@@ -21,7 +23,7 @@ export default function ScheduleScreen() {
 
     const loadData = async () => {
         try {
-            const data = await mobileApi.getSchedule();
+            const data = await mobileApi.getSchedule(selectedStudent?.id);
             setSchedule(data);
         } catch { } finally {
             setLoading(false);
@@ -32,7 +34,7 @@ export default function ScheduleScreen() {
         useCallback(() => {
             loadData();
             if (selectedDay < 0) setSelectedDay(0);
-        }, [])
+        }, [selectedStudent])
     );
 
     const onRefresh = async () => {
@@ -53,7 +55,7 @@ export default function ScheduleScreen() {
                         onPress={() => setSelectedDay(index)}
                     >
                         <Text style={[GlobalStyles.dayButtonText, selectedDay === index && GlobalStyles.dayButtonTextActive]}>
-                            {day.substring(0, 3)}
+                            {day}
                         </Text>
                     </TouchableOpacity>
                 ))}
@@ -74,8 +76,8 @@ export default function ScheduleScreen() {
                     </View>
                 ) : (
                     todaysLessons.map((lesson, index) => (
-                        <View key={index} style={[GlobalStyles.row, GlobalStyles.cardSmall, { padding: Spacing[3] }]}>
-                            <View style={{ width: 50, alignItems: 'center', borderRightWidth: 1, borderRightColor: Colors.neutral[100], marginRight: Spacing[3], paddingRight: Spacing[3] }}>
+                        <View key={index} style={[GlobalStyles.row, GlobalStyles.cardSmall, { padding: Spacing[2] }]}>
+                            <View style={{ width: Spacing[14], alignItems: 'center', borderRightWidth: 1, borderRightColor: Colors.neutral[100], marginRight: Spacing[3], paddingRight: Spacing[3] }}>
                                 <Text style={{ fontSize: FontSizes['2xl'], fontWeight: '700', color: Colors.primary.DEFAULT }}>{lesson.orderNumber}</Text>
                                 <Text style={GlobalStyles.caption}>{lesson.startTime}</Text>
                                 <Text style={GlobalStyles.caption}>{lesson.endTime}</Text>

@@ -80,7 +80,7 @@ export default function AppLayout() {
                     paddingTop: 8,
                 },
                 tabBarLabelStyle: {
-                    fontSize: 14,
+                    fontSize: FontSizes.xs,
                     fontWeight: '500',
                 },
                 headerStyle: {
@@ -126,7 +126,37 @@ export default function AppLayout() {
                     headerLeft: () => (
                         <TouchableOpacity
                             onPress={() => require('expo-router').router.back()}
-                            style={{ marginLeft: 16 }}
+                            style={{ marginLeft: Spacing[4] }}
+                        >
+                            <ArrowLeft size={24} color={theme.text} />
+                        </TouchableOpacity>
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="announcement-detail"
+                options={{
+                    href: null,
+                    title: 'Ogłoszenie',
+                    headerLeft: () => (
+                        <TouchableOpacity
+                            onPress={() => require('expo-router').router.navigate('/(app)/announcements')}
+                            style={{ marginLeft: Spacing[4] }}
+                        >
+                            <ArrowLeft size={24} color={theme.text} />
+                        </TouchableOpacity>
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="excuse-form"
+                options={{
+                    href: null,
+                    title: 'Usprawiedliwienie',
+                    headerLeft: () => (
+                        <TouchableOpacity
+                            onPress={() => require('expo-router').router.navigate('/(app)/excuses')}
+                            style={{ marginLeft: Spacing[4] }}
                         >
                             <ArrowLeft size={24} color={theme.text} />
                         </TouchableOpacity>

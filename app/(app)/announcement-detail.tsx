@@ -1,0 +1,99 @@
+import { GlobalStyles } from '@/constants/styles';
+import { Colors, FontSizes, Spacing } from '@/constants/theme';
+import { announcementsApi, MobileAnnouncementDto, mobileApi } from '@/services/api';
+import { formatDateTime } from '@/utils/formatters';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+    ActivityIndicator,
+    ScrollView,
+    Text,
+    useWindowDimensions,
+    View,
+} from 'react-native';
+import RenderHtml from 'react-native-render-html';
+
+export default function AnnouncementDetailScreen() {
+    const { id } = useLocalSearchParams<{ id: string }>();
+    const [announcement, setAnnouncement] = useState<MobileAnnouncementDto | null>(null);
+    const [loading, setLoading] = useState(true);
+    const { width } = useWindowDimensions();
+
+    useEffect(() => {
+        loadAnnouncement();
+    }, [id]);
+
+    const loadAnnouncement = async () => {
+        if (!id) {
+            router.back();
+            return;
+        }
+
+        try {
+            const data = await mobileApi.getAnnouncements();
+            const found = data.find(a => a.id === Number(id));
+            if (found) {
+                setAnnouncement(found);
+                if (!found.isRead) {
+                    await announcementsApi.markAsRead(found.id);
+                }
+            } else {
+                router.back();
+            }
+        } catch {
+            router.back();
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <View style={[GlobalStyles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color={Colors.primary.DEFAULT} />
+            </View>
+        );
+    }
+
+    if (!announcement) return null;
+
+    const contentWidth = width - Spacing[4] * 4;
+
+    return (
+        <View style={GlobalStyles.screen}>
+            <ScrollView contentContainerStyle={GlobalStyles.scrollContent}>
+                <View style={GlobalStyles.card}>
+                    <View style={{ marginBottom: Spacing[4] }}>
+                        <Text style={GlobalStyles.caption}>Data publikacji: {formatDateTime(announcement.createdAt)}</Text>
+                        <Text style={GlobalStyles.caption}>Autor: {announcement.authorName}</Text>
+                        {announcement.updatedAt && (
+                            <Text style={[GlobalStyles.caption, { marginTop: Spacing[1] }]}>
+                                Edytowano: {formatDateTime(announcement.updatedAt)}
+                            </Text>
+                        )}
+                    </View>
+                    <Text style={[GlobalStyles.headerMedium, { marginBottom: Spacing[4] }]}>
+                        {announcement.title}
+                    </Text>
+                    <RenderHtml
+                        contentWidth={contentWidth}
+                        source={{ html: announcement.content }}
+                        baseStyle={{
+                            fontSize: FontSizes.base,
+                            color: Colors.neutral[700],
+                            lineHeight: 28,
+                        }}
+                        tagsStyles={{
+                            a: { color: Colors.primary.DEFAULT },
+                            strong: { fontWeight: '700' },
+                            em: { fontStyle: 'italic' },
+                            ul: { paddingLeft: Spacing[4] },
+                            ol: { paddingLeft: Spacing[4] },
+                            li: { marginBottom: Spacing[1] },
+                        }}
+                    />
+                </View>
+            </ScrollView>
+        </View>
+    );
+}

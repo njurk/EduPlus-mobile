@@ -1,5 +1,6 @@
 import { Colors } from '@/constants/theme';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { StudentProvider } from '@/contexts/StudentContext';
 import { Redirect, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
@@ -37,8 +38,10 @@ function AppNavigator() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <AppNavigator />
-      <RootLayoutNav />
+      <StudentProvider>
+        <AppNavigator />
+        <RootLayoutNav />
+      </StudentProvider>
     </AuthProvider>
   );
 }

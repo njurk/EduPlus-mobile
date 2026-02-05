@@ -64,6 +64,7 @@ export const FontSizes = {
   xl: 24,
   '2xl': 26,
   '3xl': 32,
+  '4xl': 48,
 };
 
 export const FontWeights: Record<string, TextStyle['fontWeight']> = {
@@ -91,6 +92,7 @@ export const Spacing = {
   9: 36,
   10: 40,
   12: 48,
+  14: 56,
   16: 64,
 };
 

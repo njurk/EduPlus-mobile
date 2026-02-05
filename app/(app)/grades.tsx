@@ -1,11 +1,12 @@
+import SemesterPicker from '@/components/SemesterPicker';
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
+import { useStudent } from '@/contexts/StudentContext';
 import { mobileApi, MobileSubjectGradesDto } from '@/services/api';
 import { formatAverage, formatDateTime } from '@/utils/formatters';
-import { useFocusEffect } from '@react-navigation/native';
-import { router, useLocalSearchParams } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+    ActivityIndicator,
     Modal,
     RefreshControl,
     ScrollView,
@@ -27,47 +28,39 @@ interface GradeDetail {
 }
 
 export default function GradesScreen() {
-    const { openGradeId } = useLocalSearchParams<{ openGradeId?: string }>();
+    const { selectedStudent } = useStudent();
+    const [currentSemesterId, setCurrentSemesterId] = useState<number | null>(null);
     const [subjects, setSubjects] = useState<MobileSubjectGradesDto[]>([]);
     const [expandedSubject, setExpandedSubject] = useState<number | null>(null);
     const [selectedGrade, setSelectedGrade] = useState<GradeDetail | null>(null);
     const [refreshing, setRefreshing] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    const loadData = async () => {
+    const loadData = async (semesterId: number) => {
+        setLoading(true);
+        setExpandedSubject(null);
         try {
-            const data = await mobileApi.getGrades();
+            const data = await mobileApi.getGrades(selectedStudent?.id, semesterId);
             setSubjects(data.subjects);
-            return data.subjects;
         } catch { } finally {
             setLoading(false);
+            setRefreshing(false);
         }
-        return [];
     };
 
-    useFocusEffect(
-        useCallback(() => {
-            loadData().then((loadedSubjects) => {
-                if (openGradeId) {
-                    const gradeId = Number(openGradeId);
-                    for (const subject of loadedSubjects) {
-                        const grade = subject.grades.find(g => g.id === gradeId);
-                        if (grade) {
-                            setExpandedSubject(subject.subjectId);
-                            setSelectedGrade({ ...grade, subjectName: subject.subjectName });
-                            break;
-                        }
-                    }
-                    router.setParams({ openGradeId: undefined });
-                }
-            });
-        }, [openGradeId])
-    );
+    useEffect(() => {
+        if (currentSemesterId) loadData(currentSemesterId);
+    }, [selectedStudent]);
+
+    const onSemesterChange = (id: number) => {
+        setCurrentSemesterId(id);
+        loadData(id);
+    };
 
     const onRefresh = async () => {
+        if (!currentSemesterId) return;
         setRefreshing(true);
-        await loadData();
-        setRefreshing(false);
+        await loadData(currentSemesterId);
     };
 
     return (
@@ -77,9 +70,15 @@ export default function GradesScreen() {
                 contentContainerStyle={GlobalStyles.scrollContent}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary.DEFAULT]} />}
             >
-                {subjects.length === 0 && !loading ? (
+                <SemesterPicker onSemesterChange={onSemesterChange} />
+
+                {loading ? (
+                    <View style={[GlobalStyles.emptyContainer, { paddingTop: Spacing[8] }]}>
+                        <ActivityIndicator size="large" color={Colors.primary.DEFAULT} />
+                    </View>
+                ) : subjects.length === 0 ? (
                     <View style={GlobalStyles.emptyContainer}>
-                        <Text style={GlobalStyles.emptyText}>Brak ocen do wyświetlenia</Text>
+                        <Text style={GlobalStyles.emptyText}>Brak ocen</Text>
                     </View>
                 ) : (
                     subjects.map((subject) => (
@@ -111,8 +110,8 @@ export default function GradesScreen() {
                                             }}
                                             activeOpacity={0.7}
                                         >
-                                            <View style={[GlobalStyles.gradeBoxSmall, { backgroundColor: grade.categoryColorHex || Colors.neutral[300] }]}>
-                                                <Text style={GlobalStyles.gradeValueSmall}>{grade.value}</Text>
+                                            <View style={[GlobalStyles.gradeBox, { backgroundColor: grade.categoryColorHex || Colors.neutral[300] }]}>
+                                                <Text style={GlobalStyles.gradeValue}>{grade.value}</Text>
                                             </View>
                                             <View style={{ flex: 1, marginLeft: Spacing[3] }}>
                                                 <Text style={GlobalStyles.title}>{grade.categoryName}</Text>
@@ -155,21 +154,21 @@ export default function GradesScreen() {
                                 </View>
 
                                 <View style={{ gap: Spacing[4] }}>
-                                    <View style={GlobalStyles.rowBetween}>
+                                    <View>
                                         <Text style={GlobalStyles.caption}>Nauczyciel</Text>
                                         <Text style={GlobalStyles.subtitle}>{selectedGrade.teacherName}</Text>
                                     </View>
-                                    <View style={GlobalStyles.rowBetween}>
+                                    <View>
                                         <Text style={GlobalStyles.caption}>Waga</Text>
                                         <Text style={GlobalStyles.subtitle}>{selectedGrade.weight}</Text>
                                     </View>
-                                    <View style={GlobalStyles.rowBetween}>
+                                    <View>
                                         <Text style={GlobalStyles.caption}>Data wystawienia</Text>
                                         <Text style={GlobalStyles.subtitle}>{formatDateTime(selectedGrade.createdAt)}</Text>
                                     </View>
                                     {selectedGrade.comment && (
                                         <View>
-                                            <Text style={[GlobalStyles.caption, { marginBottom: Spacing[2] }]}>Komentarz</Text>
+                                            <Text style={GlobalStyles.caption}>Komentarz</Text>
                                             <Text style={GlobalStyles.subtitle}>{selectedGrade.comment}</Text>
                                         </View>
                                     )}
