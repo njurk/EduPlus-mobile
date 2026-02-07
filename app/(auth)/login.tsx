@@ -24,6 +24,7 @@ export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState<Record<string, string>>({});
+
     const [apiError, setApiError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -31,8 +32,8 @@ export default function LoginScreen() {
 
     useEffect(() => {
         const newErrors = validateLoginForm(email, password);
-        setErrors(newErrors);
-    }, [email, password]);
+        setErrors(prev => ({ ...prev, password: newErrors.password }));
+    }, [password]);
 
     const handleLogin = async () => {
         const validationErrors = validateLoginForm(email, password);
@@ -73,16 +74,17 @@ export default function LoginScreen() {
                     <View style={GlobalStyles.inputGroup}>
                         <Text style={GlobalStyles.label}>Email</Text>
                         <TextInput
-                            style={[GlobalStyles.input, email.length > 0 && errors.email && { borderColor: Colors.danger.DEFAULT }]}
+                            style={[GlobalStyles.input, errors.email && { borderColor: Colors.danger.DEFAULT }]}
                             placeholder="jankowalski@gmail.com"
                             placeholderTextColor={Colors.neutral[400]}
                             value={email}
-                            onChangeText={setEmail}
+                            onChangeText={(text) => { setEmail(text); setErrors(({ email: _, ...rest }) => rest); }}
+                            onBlur={() => { const e = validateLoginForm(email, password); if (e.email) setErrors(prev => ({ ...prev, email: e.email })); }}
                             keyboardType="email-address"
                             autoCapitalize="none"
                             autoComplete="email"
                         />
-                        {email.length > 0 && errors.email && <Text style={GlobalStyles.errorText}>{errors.email}</Text>}
+                        {errors.email && <Text style={GlobalStyles.errorText}>{errors.email}</Text>}
                     </View>
 
                     <View style={GlobalStyles.inputGroup}>

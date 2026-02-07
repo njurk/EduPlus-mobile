@@ -38,6 +38,7 @@ export default function AnnouncementsScreen() {
         if (openId && announcements.length > 0) {
             const announcement = announcements.find(a => a.id === Number(openId));
             if (announcement) {
+                router.setParams({ openId: '' });
                 router.push(`/(app)/announcement-detail?id=${openId}`);
             }
         }
