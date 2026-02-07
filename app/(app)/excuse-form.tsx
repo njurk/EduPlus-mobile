@@ -37,9 +37,9 @@ export default function ExcuseFormScreen() {
                 attendanceIds: selectedItems.map(item => item.id),
                 reason: reason.trim(),
             });
-            Alert.alert('Sukces', 'Usprawiedliwienie zostało wysłane', [
-                { text: 'OK', onPress: () => router.navigate('/(app)/excuses') }
-            ]);
+            setReason('');
+            router.navigate('/(app)/excuses');
+            setTimeout(() => Alert.alert('Sukces', 'Usprawiedliwienie zostało wysłane'), 100);
         } catch (error) {
             Alert.alert('Błąd', 'Nie udało się wysłać usprawiedliwienia');
         } finally {
@@ -69,7 +69,7 @@ export default function ExcuseFormScreen() {
                                 {item.subjectName}
                             </Text>
                             <Text style={GlobalStyles.caption}>
-                                {formatDate(item.date)} • Lekcja {item.lessonHour}
+                                {formatDate(item.date)}, lekcja {item.lessonHour}
                             </Text>
                         </View>
                         <View style={{
@@ -86,7 +86,7 @@ export default function ExcuseFormScreen() {
                 ))}
 
                 <Text style={[GlobalStyles.sectionTitle, { marginTop: Spacing[4], marginBottom: Spacing[2] }]}>
-                    Treść usprawiedliwienia:
+                    Treść:
                 </Text>
 
                 <View style={GlobalStyles.card}>

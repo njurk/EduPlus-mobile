@@ -158,6 +158,23 @@ export interface MobileChildDto {
     className: string | null;
 }
 
+export interface MobileExcuseAttendanceDto {
+    id: number;
+    subjectName: string;
+    date: string;
+    lessonHour: number;
+    attendanceType: string;
+}
+
+export interface MobileExcuseDto {
+    id: number;
+    reason: string;
+    status: string;
+    statusColorHex: string;
+    createdAt: string;
+    attendances: MobileExcuseAttendanceDto[];
+}
+
 async function getStoredToken(): Promise<string | null> {
     if (Platform.OS === 'web') {
         return localStorage.getItem(TOKEN_KEY);
@@ -354,6 +371,17 @@ export const mobileApi = {
         const qs = params.toString() ? `?${params.toString()}` : '';
         const response = await fetch(`${API_URL}/mobile/negative-attendances${qs}`, { headers });
         const data = await handleResponse<MobileNegativeAttendanceDto[]>(response);
+        return data ?? [];
+    },
+
+    async getExcuses(studentId?: number, semesterId?: number): Promise<MobileExcuseDto[]> {
+        const headers = await getHeaders();
+        const params = new URLSearchParams();
+        if (studentId) params.append('studentId', studentId.toString());
+        if (semesterId) params.append('semesterId', semesterId.toString());
+        const qs = params.toString() ? `?${params.toString()}` : '';
+        const response = await fetch(`${API_URL}/mobile/excuses${qs}`, { headers });
+        const data = await handleResponse<MobileExcuseDto[]>(response);
         return data ?? [];
     },
 

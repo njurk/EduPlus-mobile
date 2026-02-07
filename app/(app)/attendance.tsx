@@ -1,6 +1,7 @@
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useStudent } from '@/contexts/StudentContext';
+import { useCMSContent } from '@/hooks/useCMSContent';
 import { mobileApi, MobileAttendanceStatDto, MobileDailyLessonDto, MobileSubjectAttendanceDto } from '@/services/api';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
@@ -38,6 +39,7 @@ const formatDateForApi = (date: Date) => {
 
 export default function AttendanceScreen() {
     const { selectedStudent } = useStudent();
+    const { getText } = useCMSContent('mobileAttendance');
     const [activeTab, setActiveTab] = useState<TabType>('week');
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [weekDays, setWeekDays] = useState(getWeekDays(new Date()));
@@ -62,8 +64,11 @@ export default function AttendanceScreen() {
 
     useFocusEffect(
         useCallback(() => {
-            loadData(selectedDate);
-        }, [])
+            const today = new Date();
+            setSelectedDate(today);
+            setWeekDays(getWeekDays(today));
+            loadData(today);
+        }, [selectedStudent])
     );
 
     const onRefresh = async () => {
@@ -150,7 +155,7 @@ export default function AttendanceScreen() {
                 <Text style={GlobalStyles.caption}>Ładowanie...</Text>
             ) : dailyLessons.length === 0 ? (
                 <View style={GlobalStyles.emptyContainer}>
-                    <Text style={GlobalStyles.emptyText}>Brak lekcji w tym dniu</Text>
+                    <Text style={GlobalStyles.emptyText}>Brak lekcji</Text>
                 </View>
             ) : (
                 dailyLessons.map((lesson, index) => (
@@ -220,8 +225,8 @@ export default function AttendanceScreen() {
         >
             <View style={{ flexDirection: 'row', marginBottom: Spacing[4], borderBottomWidth: 1, borderBottomColor: Colors.neutral[100] }}>
                 {[
-                    { key: 'week' as TabType, label: 'Tydzień' },
-                    { key: 'stats' as TabType, label: 'Statystyki' },
+                    { key: 'week' as TabType, label: getText('tabs.week') },
+                    { key: 'stats' as TabType, label: getText('tabs.stats') },
                 ].map((tab) => (
                     <TouchableOpacity
                         key={tab.key}

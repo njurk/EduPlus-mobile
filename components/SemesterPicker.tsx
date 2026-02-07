@@ -27,29 +27,20 @@ export default function SemesterPicker({ onSemesterChange }: Props) {
     const selected = semesters.find(s => s.id === selectedId);
 
     return (
-        <View style={{ marginBottom: Spacing[3], zIndex: 10 }}>
+        <View style={{ marginBottom: Spacing[3] }}>
             <TouchableOpacity
-                style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', backgroundColor: Colors.neutral[100], paddingHorizontal: Spacing[3], paddingVertical: Spacing[2], borderRadius: 8 }}
+                style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.neutral[100], paddingHorizontal: Spacing[3], paddingVertical: Spacing[2], borderRadius: 4, alignSelf: 'flex-start' }}
                 onPress={() => setExpanded(!expanded)}
             >
-                <Text style={{ fontSize: FontSizes.sm, fontWeight: '500', color: Colors.neutral[700] }}>
-                    {selected?.name ?? 'Semestr'}
-                </Text>
+                <Text style={{ fontSize: FontSizes.sm, fontWeight: '500', color: Colors.neutral[700] }}>{selected?.name ?? 'Semestr'}</Text>
                 <Icon size={16} color={Colors.neutral[500]} style={{ marginLeft: Spacing[1] }} />
             </TouchableOpacity>
 
             {expanded && (
-                <View style={{ position: 'absolute', top: '100%', left: 0, marginTop: Spacing[1], backgroundColor: Colors.white, borderRadius: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 4, elevation: 4 }}>
+                <View style={{ marginTop: Spacing[1], backgroundColor: Colors.white, borderRadius: 4, borderWidth: 1, borderColor: Colors.neutral[200], alignSelf: 'flex-start' }}>
                     {semesters.map(s => (
-                        <TouchableOpacity 
-                            key={s.id} 
-                            style={{ paddingVertical: Spacing[2], paddingHorizontal: Spacing[3], backgroundColor: selectedId === s.id ? Colors.primary.light : 'transparent' }} 
-                            onPress={() => select(s.id)}
-                        >
-                            <Text 
-                                style={{ fontSize: FontSizes.sm, color: selectedId === s.id ? Colors.primary.hover : Colors.neutral[700], fontWeight: selectedId === s.id ? '600' : '400' }}>
-                                {s.name}
-                            </Text>
+                        <TouchableOpacity key={s.id} style={{ paddingVertical: Spacing[2], paddingHorizontal: Spacing[3], backgroundColor: selectedId === s.id ? Colors.primary.light : 'transparent' }} onPress={() => select(s.id)}>
+                            <Text style={{ fontSize: FontSizes.sm, color: Colors.neutral[800], fontWeight: selectedId === s.id ? '600' : '400' }}>{s.name}</Text>
                         </TouchableOpacity>
                     ))}
                 </View>

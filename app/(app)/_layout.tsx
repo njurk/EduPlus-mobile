@@ -9,28 +9,48 @@ import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 
 interface TabConfig {
     name: string;
-    headerTitleKey?: string;
-    tabLabel: string;
+    pageLabel: string;
     icon: LucideIcon;
     parentOnly?: boolean;
 }
 
 const tabs: TabConfig[] = [
-    { name: 'index', headerTitleKey: 'systemName', tabLabel: 'Pulpit', icon: Layout },
-    { name: 'grades', tabLabel: 'Oceny', icon: Star },
-    { name: 'attendance', tabLabel: 'Frekwencja', icon: CheckCircle },
-    { name: 'schedule', tabLabel: 'Plan lekcji', icon: Table },
-    { name: 'announcements', tabLabel: 'Ogłoszenia', icon: Megaphone },
-    { name: 'excuses', tabLabel: 'Usprawiedliwienia', icon: FileCheck, parentOnly: true },
+    { name: 'index', pageLabel: 'mobileDashboard', icon: Layout },
+    { name: 'grades', pageLabel: 'mobileGrades', icon: Star },
+    { name: 'attendance', pageLabel: 'mobileAttendance', icon: CheckCircle },
+    { name: 'schedule', pageLabel: 'mobileSchedule', icon: Table },
+    { name: 'announcements', pageLabel: 'mobileAnnouncements', icon: Megaphone },
+    { name: 'excuses', pageLabel: 'mobileExcuses', icon: FileCheck, parentOnly: true },
 ];
 
 export default function AppLayout() {
     const { isParent, logout } = useAuth();
-    const { getText } = useCMSContent('system');
+    const { getText: getSystemText } = useCMSContent('system');
+    const { getText: getDashboardText } = useCMSContent('mobileDashboard');
+    const { getText: getGradesText } = useCMSContent('mobileGrades');
+    const { getText: getAttendanceText } = useCMSContent('mobileAttendance');
+    const { getText: getScheduleText } = useCMSContent('mobileSchedule');
+    const { getText: getAnnouncementsText } = useCMSContent('mobileAnnouncements');
+    const { getText: getExcusesText } = useCMSContent('mobileExcuses');
+    const { getText: getSettingsText } = useCMSContent('mobileSettings');
+    const { getText: getAnnouncementDetailText } = useCMSContent('mobileAnnouncementDetail');
+    const { getText: getExcuseFormText } = useCMSContent('mobileExcuseForm');
     const theme = Colors.light;
 
+    const getTabLabel = (pageLabel: string): string => {
+        const getters: Record<string, (key: string) => string> = {
+            mobileDashboard: getDashboardText,
+            mobileGrades: getGradesText,
+            mobileAttendance: getAttendanceText,
+            mobileSchedule: getScheduleText,
+            mobileAnnouncements: getAnnouncementsText,
+            mobileExcuses: getExcusesText,
+        };
+        return getters[pageLabel]?.('title') ?? '';
+    };
+
     const visibleTabs = tabs.filter(tab => !tab.parentOnly || isParent);
-    const logoUrl = `${BASE_URL}/${getText('logoUrl', 'logo-512.png')}`;
+    const logoUrl = `${BASE_URL}/${getSystemText('logoUrl')}`;
 
     const confirmLogout = () => {
         Alert.alert(
@@ -51,7 +71,7 @@ export default function AppLayout() {
                 resizeMode="contain"
             />
             <Text style={{ fontSize: FontSizes.lg, fontWeight: '600', color: theme.text }}>
-                {getText('systemName', 'EduPlus')}
+                {getSystemText('systemName')}
             </Text>
         </View>
     );
@@ -67,6 +87,12 @@ export default function AppLayout() {
         </View>
     );
 
+    const BackButton = ({ onPress }: { onPress: () => void }) => (
+        <TouchableOpacity onPress={onPress} style={{ marginLeft: Spacing[4] }}>
+            <ArrowLeft size={24} color={theme.text} />
+        </TouchableOpacity>
+    );
+
     return (
         <Tabs
             screenOptions={{
@@ -75,7 +101,7 @@ export default function AppLayout() {
                 tabBarStyle: {
                     backgroundColor: theme.card,
                     borderTopColor: theme.border,
-                    height: 95,
+                    height: 110,
                     paddingBottom: 8,
                     paddingTop: 8,
                 },
@@ -94,8 +120,8 @@ export default function AppLayout() {
                     key={tab.name}
                     name={tab.name}
                     options={{
-                        title: tab.tabLabel,
-                        tabBarLabel: tab.tabLabel,
+                        title: getTabLabel(tab.pageLabel),
+                        tabBarLabel: getTabLabel(tab.pageLabel),
                         tabBarIcon: ({ color }) => {
                             const Icon = tab.icon;
                             return <Icon size={26} color={color} />;
@@ -122,45 +148,24 @@ export default function AppLayout() {
                 name="settings"
                 options={{
                     href: null,
-                    title: 'Ustawienia',
-                    headerLeft: () => (
-                        <TouchableOpacity
-                            onPress={() => require('expo-router').router.back()}
-                            style={{ marginLeft: Spacing[4] }}
-                        >
-                            <ArrowLeft size={24} color={theme.text} />
-                        </TouchableOpacity>
-                    ),
+                    title: getSettingsText('title'),
+                    headerLeft: () => <BackButton onPress={() => router.back()} />,
                 }}
             />
             <Tabs.Screen
                 name="announcement-detail"
                 options={{
                     href: null,
-                    title: 'Ogłoszenie',
-                    headerLeft: () => (
-                        <TouchableOpacity
-                            onPress={() => require('expo-router').router.navigate('/(app)/announcements')}
-                            style={{ marginLeft: Spacing[4] }}
-                        >
-                            <ArrowLeft size={24} color={theme.text} />
-                        </TouchableOpacity>
-                    ),
+                    title: getAnnouncementDetailText('title'),
+                    headerLeft: () => <BackButton onPress={() => router.navigate('/(app)/announcements')} />,
                 }}
             />
             <Tabs.Screen
                 name="excuse-form"
                 options={{
                     href: null,
-                    title: 'Usprawiedliwienie',
-                    headerLeft: () => (
-                        <TouchableOpacity
-                            onPress={() => require('expo-router').router.navigate('/(app)/excuses')}
-                            style={{ marginLeft: Spacing[4] }}
-                        >
-                            <ArrowLeft size={24} color={theme.text} />
-                        </TouchableOpacity>
-                    ),
+                    title: getExcuseFormText('title'),
+                    headerLeft: () => <BackButton onPress={() => router.navigate('/(app)/excuses')} />,
                 }}
             />
         </Tabs>

@@ -63,15 +63,6 @@ export default function AnnouncementDetailScreen() {
         <View style={GlobalStyles.screen}>
             <ScrollView contentContainerStyle={GlobalStyles.scrollContent}>
                 <View style={GlobalStyles.card}>
-                    <View style={{ marginBottom: Spacing[4] }}>
-                        <Text style={GlobalStyles.caption}>Data publikacji: {formatDateTime(announcement.createdAt)}</Text>
-                        <Text style={GlobalStyles.caption}>Autor: {announcement.authorName}</Text>
-                        {announcement.updatedAt && (
-                            <Text style={[GlobalStyles.caption, { marginTop: Spacing[1] }]}>
-                                Edytowano: {formatDateTime(announcement.updatedAt)}
-                            </Text>
-                        )}
-                    </View>
                     <Text style={[GlobalStyles.headerMedium, { marginBottom: Spacing[4] }]}>
                         {announcement.title}
                     </Text>
@@ -79,9 +70,9 @@ export default function AnnouncementDetailScreen() {
                         contentWidth={contentWidth}
                         source={{ html: announcement.content }}
                         baseStyle={{
-                            fontSize: FontSizes.base,
+                            fontSize: FontSizes.sm,
                             color: Colors.neutral[700],
-                            lineHeight: 28,
+                            lineHeight: 24,
                         }}
                         tagsStyles={{
                             a: { color: Colors.primary.DEFAULT },
@@ -92,6 +83,15 @@ export default function AnnouncementDetailScreen() {
                             li: { marginBottom: Spacing[1] },
                         }}
                     />
+                    <View style={{ marginTop: Spacing[4], paddingTop: Spacing[4], borderTopWidth: 1, borderTopColor: Colors.neutral[200] }}>
+                        <Text style={GlobalStyles.caption}>Data publikacji: {formatDateTime(announcement.createdAt)}</Text>
+                        <Text style={GlobalStyles.caption}>Autor: {announcement.authorName}</Text>
+                        {announcement.updatedAt && (
+                            <Text style={[GlobalStyles.caption]}>
+                                Edytowano: {formatDateTime(announcement.updatedAt)}
+                            </Text>
+                        )}
+                    </View>
                 </View>
             </ScrollView>
         </View>

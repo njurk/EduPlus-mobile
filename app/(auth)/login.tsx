@@ -19,16 +19,15 @@ import {
 
 export default function LoginScreen() {
     const { login } = useAuth();
+    const { getText } = useCMSContent('mobileLogin');
     const { getText: getSystemText } = useCMSContent('system');
-    const { getText: getSubmitTicketText } = useCMSContent('submitTicket');
-    const { getText: getResetText } = useCMSContent('resetPassword');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [apiError, setApiError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const logoUrl = `${BASE_URL}/${getSystemText('logoUrl', 'logo-512.png')}`;
+    const logoUrl = `${BASE_URL}/${getSystemText('logoUrl')}`;
 
     useEffect(() => {
         const newErrors = validateLoginForm(email, password);
@@ -65,9 +64,9 @@ export default function LoginScreen() {
                         resizeMode="contain"
                     />
                     <Text style={{ fontSize: FontSizes['3xl'], fontWeight: '700', color: Colors.primary.DEFAULT, marginBottom: Spacing[2] }}>
-                        {getSystemText('systemName', 'EduPlus')}
+                        {getSystemText('systemName')}
                     </Text>
-                    <Text style={GlobalStyles.subtitle}>{getSystemText('pageTitle', 'Twój e-dziennik')}</Text>
+                    <Text style={GlobalStyles.subtitle}>{getText('subtitle')}</Text>
                 </View>
 
                 <View style={[GlobalStyles.card, { ...Shadows.md, padding: Spacing[6] }]}>
@@ -90,7 +89,7 @@ export default function LoginScreen() {
                         <Text style={GlobalStyles.label}>Hasło</Text>
                         <TextInput
                             style={[GlobalStyles.input, password.length > 0 && errors.password && { borderColor: Colors.danger.DEFAULT }]}
-                            placeholder="••••••••"
+                            placeholder="********"
                             placeholderTextColor={Colors.neutral[400]}
                             value={password}
                             onChangeText={setPassword}
@@ -116,14 +115,14 @@ export default function LoginScreen() {
 
                     <TouchableOpacity onPress={() => router.push('/(auth)/forgot-password')} style={{ marginTop: Spacing[4], alignItems: 'center' }}>
                         <Text style={{ color: Colors.primary.DEFAULT, fontSize: FontSizes.sm }}>
-                            {getResetText('title.request', 'Zapomniałeś hasła?')}
+                            {getText('link.forgotPassword')}
                         </Text>
                     </TouchableOpacity>
                 </View>
 
                 <TouchableOpacity onPress={() => router.push('/(auth)/submit-ticket')} style={{ marginTop: Spacing[6], alignItems: 'center' }}>
                     <Text style={{ color: Colors.neutral[500], fontSize: FontSizes.sm }}>
-                        {getSubmitTicketText('title', 'Masz problem? Kliknij tutaj')}
+                        {getText('link.submitTicket')}
                     </Text>
                 </TouchableOpacity>
             </View>

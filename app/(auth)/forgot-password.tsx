@@ -51,17 +51,17 @@ export default function ForgotPasswordScreen() {
             <View style={[GlobalStyles.screen, { justifyContent: 'center', padding: Spacing[6] }]}>
                 <View style={[GlobalStyles.card, { padding: Spacing[6], alignItems: 'center' }]}>
                     <Text style={[GlobalStyles.title, { marginBottom: Spacing[3], textAlign: 'center' }]}>
-                        {getText('title.sent', 'Sprawdź swoją skrzynkę')}
+                        {getText('title.sent')}
                     </Text>
                     <Text style={[GlobalStyles.subtitle, { textAlign: 'center', marginBottom: Spacing[2] }]}>
-                        {getText('message.sent', 'Jeśli adres {email} istnieje w naszej bazie, za chwilę otrzymasz wiadomość z linkiem do resetowania hasła.').replace('{email}', email)}
+                        {getText('message.sent').replace('{email}', email)}
                     </Text>
                     <Text style={[GlobalStyles.subtitle, { textAlign: 'center', marginBottom: Spacing[4], color: Colors.neutral[500] }]}>
-                        {getText('message.linkExpirationTime', 'Link wygasa po 1 godzinie')}
+                        {getText('message.linkExpirationTime')}
                     </Text>
                     <TouchableOpacity
                         style={GlobalStyles.buttonPrimary}
-                        onPress={() => router.back()}
+                        onPress={() => { setEmail(''); setSuccess(false); router.back(); }}
                     >
                         <Text style={GlobalStyles.buttonPrimaryText}>Powrót do logowania</Text>
                     </TouchableOpacity>
@@ -78,10 +78,10 @@ export default function ForgotPasswordScreen() {
             <View style={{ flex: 1, justifyContent: 'center', padding: Spacing[6] }}>
                 <View style={{ alignItems: 'center', marginBottom: Spacing[8] }}>
                     <Text style={{ fontSize: FontSizes['2xl'], fontWeight: '700', color: Colors.neutral[800], marginBottom: Spacing[2] }}>
-                        {getText('title.request', 'Resetowanie hasła')}
+                        {getText('title.request')}
                     </Text>
                     <Text style={[GlobalStyles.subtitle, { textAlign: 'center' }]}>
-                        Podaj adres email powiązany z kontem
+                        {getText('subtitle')}
                     </Text>
                 </View>
 
@@ -90,7 +90,7 @@ export default function ForgotPasswordScreen() {
                         <Text style={GlobalStyles.label}>Email</Text>
                         <TextInput
                             style={[GlobalStyles.input, email.length > 0 && errors.email && { borderColor: Colors.danger.DEFAULT }]}
-                            placeholder="example@gmail.com"
+                            placeholder="jankowalski@gmail.com"
                             placeholderTextColor={Colors.neutral[400]}
                             value={email}
                             onChangeText={setEmail}

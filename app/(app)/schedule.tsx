@@ -32,8 +32,9 @@ export default function ScheduleScreen() {
 
     useFocusEffect(
         useCallback(() => {
+            const today = new Date().getDay();
+            setSelectedDay(today >= 1 && today <= 5 ? today - 1 : 0);
             loadData();
-            if (selectedDay < 0) setSelectedDay(0);
         }, [selectedStudent])
     );
 
@@ -66,13 +67,9 @@ export default function ScheduleScreen() {
                 contentContainerStyle={GlobalStyles.scrollContent}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary.DEFAULT]} />}
             >
-                {!schedule && !loading ? (
+                {(!schedule && !loading) || todaysLessons.length === 0 ? (
                     <View style={GlobalStyles.emptyContainer}>
-                        <Text style={GlobalStyles.emptyText}>Brak planu lekcji</Text>
-                    </View>
-                ) : todaysLessons.length === 0 ? (
-                    <View style={GlobalStyles.emptyContainer}>
-                        <Text style={GlobalStyles.emptyText}>Brak lekcji w {DAYS[selectedDay]}</Text>
+                        <Text style={GlobalStyles.emptyText}>Brak</Text>
                     </View>
                 ) : (
                     todaysLessons.map((lesson, index) => (

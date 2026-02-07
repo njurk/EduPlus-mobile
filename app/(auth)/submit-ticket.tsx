@@ -49,7 +49,7 @@ export default function SubmitTicketScreen() {
                 setSelectedReasonId(data[0].id);
             }
         } catch {
-            setApiError('Nie udało się pobrać listy powodów');
+            setApiError('Nie udało się pobrać powodów');
         } finally {
             setIsLoadingReasons(false);
         }
@@ -80,14 +80,14 @@ export default function SubmitTicketScreen() {
             <View style={[GlobalStyles.screen, { justifyContent: 'center', padding: Spacing[6] }]}>
                 <View style={[GlobalStyles.card, { padding: Spacing[6], alignItems: 'center' }]}>
                     <Text style={[GlobalStyles.title, { marginBottom: Spacing[3], textAlign: 'center' }]}>
-                        {getText('success.title', 'Zgłoszenie wysłane')}
+                        {getText('success.title')}
                     </Text>
                     <Text style={[GlobalStyles.subtitle, { textAlign: 'center', marginBottom: Spacing[4] }]}>
-                        {getText('success.message', 'Dziękujemy za kontakt. Odpowiemy najszybciej jak to możliwe.')}
+                        {getText('success.message')}
                     </Text>
                     <TouchableOpacity
                         style={GlobalStyles.buttonPrimary}
-                        onPress={() => router.back()}
+                        onPress={() => { setEmail(''); setDescription(''); setSuccess(false); router.back(); }}
                     >
                         <Text style={GlobalStyles.buttonPrimaryText}>Powrót do logowania</Text>
                     </TouchableOpacity>
@@ -104,10 +104,10 @@ export default function SubmitTicketScreen() {
             <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: Spacing[6] }}>
                 <View style={{ alignItems: 'center', marginBottom: Spacing[6] }}>
                     <Text style={{ fontSize: FontSizes['2xl'], fontWeight: '700', color: Colors.neutral[800], marginBottom: Spacing[2] }}>
-                        {getText('title', 'Pomoc techniczna')}
+                        {getText('title')}
                     </Text>
                     <Text style={[GlobalStyles.subtitle, { textAlign: 'center' }]}>
-                        {getText('subtitle', 'Opisz swój problem, a odpowiemy najszybciej jak to możliwe')}
+                        {getText('subtitle')}
                     </Text>
                 </View>
 
@@ -116,7 +116,7 @@ export default function SubmitTicketScreen() {
                         <Text style={GlobalStyles.label}>Email kontaktowy</Text>
                         <TextInput
                             style={[GlobalStyles.input, email.length > 0 && errors.email && { borderColor: Colors.danger.DEFAULT }]}
-                            placeholder="example@gmail.com"
+                            placeholder="jankowalski@gmail.com"
                             placeholderTextColor={Colors.neutral[400]}
                             value={email}
                             onChangeText={setEmail}
@@ -139,7 +139,7 @@ export default function SubmitTicketScreen() {
                                 onPress={() => setShowReasonPicker(true)}
                             >
                                 <Text style={{ color: selectedReason ? Colors.neutral[800] : Colors.neutral[400], fontSize: FontSizes.base }}>
-                                    {selectedReason?.name || 'Wybierz powód...'}
+                                    {selectedReason?.name || 'wybierz powód...'}
                                 </Text>
                                 <ChevronDown size={20} color={Colors.neutral[400]} />
                             </TouchableOpacity>
@@ -147,10 +147,9 @@ export default function SubmitTicketScreen() {
                     </View>
 
                     <View style={GlobalStyles.inputGroup}>
-                        <Text style={GlobalStyles.label}>{getText('form.description', 'Opis problemu')}</Text>
+                        <Text style={GlobalStyles.label}>Opis problemu</Text>
                         <TextInput
                             style={[GlobalStyles.input, { height: 120, textAlignVertical: 'top' }, description.length > 0 && errors.content && { borderColor: Colors.danger.DEFAULT }]}
-                            placeholder={getText('form.descriptionPlaceholder', 'Opisz szczegółowo problem...')}
                             placeholderTextColor={Colors.neutral[400]}
                             value={description}
                             onChangeText={setDescription}

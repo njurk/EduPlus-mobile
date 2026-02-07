@@ -250,18 +250,24 @@ export const GlobalStyles = StyleSheet.create({
     },
 
     dayButton: {
-        paddingHorizontal: Spacing[3],
-        paddingVertical: Spacing[2],
-        borderRadius: BorderRadius.sm,
-        backgroundColor: Colors.neutral[100],
+        paddingHorizontal: Spacing[2],
+        paddingVertical: Spacing[2.5],
+        borderRadius: BorderRadius.md,
+        backgroundColor: Colors.neutral[50],
+        borderWidth: 1,
+        borderColor: Colors.neutral[200],
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     dayButtonActive: {
         backgroundColor: Colors.primary.DEFAULT,
+        borderColor: Colors.primary.DEFAULT,
     },
     dayButtonText: {
         fontSize: FontSizes.sm,
-        fontWeight: '500',
-        color: Colors.neutral[600],
+        fontWeight: '600',
+        color: Colors.neutral[500],
+        textAlign: 'center',
     },
     dayButtonTextActive: {
         color: Colors.white,

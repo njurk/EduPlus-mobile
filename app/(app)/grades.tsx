@@ -4,7 +4,9 @@ import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useStudent } from '@/contexts/StudentContext';
 import { mobileApi, MobileSubjectGradesDto } from '@/services/api';
 import { formatAverage, formatDateTime } from '@/utils/formatters';
-import React, { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useLocalSearchParams } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Modal,
@@ -48,9 +50,25 @@ export default function GradesScreen() {
         }
     };
 
-    useEffect(() => {
+    const { openGradeId } = useLocalSearchParams<{ openGradeId?: string }>();
+
+    useFocusEffect(useCallback(() => {
         if (currentSemesterId) loadData(currentSemesterId);
-    }, [selectedStudent]);
+    }, [selectedStudent, currentSemesterId]));
+
+    useEffect(() => {
+        if (openGradeId && subjects.length > 0) {
+            const gradeId = Number(openGradeId);
+            for (const subject of subjects) {
+                const grade = subject.grades.find(g => g.id === gradeId);
+                if (grade) {
+                    setExpandedSubject(subject.subjectId);
+                    setSelectedGrade({ ...grade, subjectName: subject.subjectName });
+                    break;
+                }
+            }
+        }
+    }, [openGradeId, subjects]);
 
     const onSemesterChange = (id: number) => {
         setCurrentSemesterId(id);
@@ -78,7 +96,7 @@ export default function GradesScreen() {
                     </View>
                 ) : subjects.length === 0 ? (
                     <View style={GlobalStyles.emptyContainer}>
-                        <Text style={GlobalStyles.emptyText}>Brak ocen</Text>
+                        <Text style={GlobalStyles.emptyText}>Brak</Text>
                     </View>
                 ) : (
                     subjects.map((subject) => (

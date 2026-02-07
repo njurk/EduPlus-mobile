@@ -3,8 +3,8 @@ import { Colors, Spacing } from '@/constants/theme';
 import { MobileAnnouncementDto, mobileApi } from '@/services/api';
 import { formatDate } from '@/utils/formatters';
 import { useFocusEffect } from '@react-navigation/native';
-import { router } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     RefreshControl,
     ScrollView,
@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 
 export default function AnnouncementsScreen() {
+    const { openId } = useLocalSearchParams<{ openId?: string }>();
     const [announcements, setAnnouncements] = useState<MobileAnnouncementDto[]>([]);
     const [refreshing, setRefreshing] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -33,6 +34,15 @@ export default function AnnouncementsScreen() {
         }, [])
     );
 
+    useEffect(() => {
+        if (openId && announcements.length > 0) {
+            const announcement = announcements.find(a => a.id === Number(openId));
+            if (announcement) {
+                router.push(`/(app)/announcement-detail?id=${openId}`);
+            }
+        }
+    }, [openId, announcements]);
+
     const onRefresh = async () => {
         setRefreshing(true);
         await loadData();
@@ -47,7 +57,7 @@ export default function AnnouncementsScreen() {
             >
                 {announcements.length === 0 && !loading ? (
                     <View style={GlobalStyles.emptyContainer}>
-                        <Text style={GlobalStyles.emptyText}>Brak ogłoszeń</Text>
+                        <Text style={GlobalStyles.emptyText}>Brak</Text>
                     </View>
                 ) : (
                     announcements.map((announcement) => (

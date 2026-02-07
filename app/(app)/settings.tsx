@@ -53,7 +53,7 @@ export default function SettingsScreen() {
             const data = await usersApi.get(user.id);
             setProfile(data);
         } catch (error) {
-            Alert.alert('Błąd', 'Nie udało się pobrać danych profilu');
+            Alert.alert('Błąd', 'Nie udało się pobrać danych');
         } finally {
             setLoading(false);
         }

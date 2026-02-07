@@ -3,6 +3,7 @@ import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStudent } from '@/contexts/StudentContext';
+import { useCMSContent } from '@/hooks/useCMSContent';
 import { MobileAnnouncementDto, mobileApi, MobileAttendanceRecordDto, MobileRecentGradeDto, MobileScheduleDto } from '@/services/api';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
@@ -20,6 +21,7 @@ const DAY_NAMES = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek',
 export default function DashboardScreen() {
     const { user } = useAuth();
     const { selectedStudent, hasMultipleChildren } = useStudent();
+    const { getText } = useCMSContent('mobileDashboard');
     const [recentGrades, setRecentGrades] = useState<MobileRecentGradeDto[]>([]);
     const [announcements, setAnnouncements] = useState<MobileAnnouncementDto[]>([]);
     const [todayLessons, setTodayLessons] = useState<MobileScheduleDto['lessons']>([]);
@@ -46,7 +48,7 @@ export default function DashboardScreen() {
 
             setRecentAttendance(attendanceData?.recentRecords?.slice(0, 3) || []);
         } catch (error) {
-            console.error('Dashboard load error:', error);
+            console.error('dashboard error:', error);
         }
     };
 
@@ -69,18 +71,18 @@ export default function DashboardScreen() {
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary.DEFAULT]} />}
         >
             <View style={{ marginBottom: Spacing[6] }}>
-                <Text style={GlobalStyles.headerLarge}>Witaj, {user?.name}!</Text>
+                <Text style={GlobalStyles.headerLarge}>{getText('greeting').replace('{name}', user?.name || '')}</Text>
                 {hasMultipleChildren ? (
                     <StudentPicker />
                 ) : user?.studentName && (
-                    <Text style={[GlobalStyles.subtitle, { marginTop: Spacing[1] }]}>Uczeń: {user.studentName}</Text>
+                    <Text style={[GlobalStyles.subtitle, { marginTop: Spacing[1] }]}>{getText('studentLabel')} {user.studentName}</Text>
                 )}
             </View>
 
             <View style={GlobalStyles.card}>
-                <Text style={GlobalStyles.cardTitle}>Lekcje dzisiaj ({DAY_NAMES[new Date().getDay()]})</Text>
+                <Text style={GlobalStyles.cardTitle}>{getText('lessonsToday').replace('{day}', DAY_NAMES[new Date().getDay()])}</Text>
                 {todayLessons.length === 0 ? (
-                    <Text style={GlobalStyles.emptyText}>Brak lekcji na dziś</Text>
+                    <Text style={GlobalStyles.emptyText}>Brak</Text>
                 ) : (
                     todayLessons.map((lesson, index) => (
                         <View key={index} style={[GlobalStyles.rowBetween, GlobalStyles.divider]}>
@@ -97,9 +99,9 @@ export default function DashboardScreen() {
             </View>
 
             <View style={GlobalStyles.card}>
-                <Text style={GlobalStyles.cardTitle}>Ostatnie oceny</Text>
+                <Text style={GlobalStyles.cardTitle}>{getText('recentGrades')}</Text>
                 {recentGrades.length === 0 ? (
-                    <Text style={GlobalStyles.emptyText}>Brak ocen do wyświetlenia</Text>
+                    <Text style={GlobalStyles.emptyText}>Brak</Text>
                 ) : (
                     recentGrades.map((grade, index) => (
                         <TouchableOpacity
@@ -121,9 +123,9 @@ export default function DashboardScreen() {
             </View>
 
             <View style={GlobalStyles.card}>
-                <Text style={GlobalStyles.cardTitle}>Ostatnia frekwencja</Text>
+                <Text style={GlobalStyles.cardTitle}>{getText('recentAttendance')}</Text>
                 {recentAttendance.length === 0 ? (
-                    <Text style={GlobalStyles.emptyText}>Brak danych o frekwencji</Text>
+                    <Text style={GlobalStyles.emptyText}>Brak</Text>
                 ) : (
                     recentAttendance.map((record, index) => (
                         <View key={index} style={[GlobalStyles.rowBetween, GlobalStyles.divider]}>
@@ -140,9 +142,9 @@ export default function DashboardScreen() {
             </View>
 
             <View style={GlobalStyles.card}>
-                <Text style={GlobalStyles.cardTitle}>Ostatnie ogłoszenia</Text>
+                <Text style={GlobalStyles.cardTitle}>{getText('recentAnnouncements')}</Text>
                 {announcements.length === 0 ? (
-                    <Text style={GlobalStyles.emptyText}>Brak ogłoszeń</Text>
+                    <Text style={GlobalStyles.emptyText}>Brak</Text>
                 ) : (
                     announcements.map((announcement) => (
                         <TouchableOpacity
