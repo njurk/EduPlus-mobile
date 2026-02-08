@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCMSContent } from '@/hooks/useCMSContent';
 import { BASE_URL } from '@/services/api';
 import { Tabs, router } from 'expo-router';
-import { ArrowLeft, CheckCircle, FileCheck, Layout, LogOut, LucideIcon, Megaphone, Settings, Star, Table } from 'lucide-react-native';
+import { ArrowLeft, ClipboardCheck, FileCheck, Home, LogOut, LucideIcon, Megaphone, Settings, Star, Table } from 'lucide-react-native';
 import React from 'react';
 import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 
@@ -15,9 +15,9 @@ interface TabConfig {
 }
 
 const tabs: TabConfig[] = [
-    { name: 'index', pageLabel: 'mobileDashboard', icon: Layout },
+    { name: 'index', pageLabel: 'mobileDashboard', icon: Home },
     { name: 'grades', pageLabel: 'mobileGrades', icon: Star },
-    { name: 'attendance', pageLabel: 'mobileAttendance', icon: CheckCircle },
+    { name: 'attendance', pageLabel: 'mobileAttendance', icon: ClipboardCheck },
     { name: 'schedule', pageLabel: 'mobileSchedule', icon: Table },
     { name: 'announcements', pageLabel: 'mobileAnnouncements', icon: Megaphone },
     { name: 'excuses', pageLabel: 'mobileExcuses', icon: FileCheck, parentOnly: true },
