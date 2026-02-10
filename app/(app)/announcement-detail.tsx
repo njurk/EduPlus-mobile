@@ -29,6 +29,9 @@ export default function AnnouncementDetailScreen() {
             return;
         }
 
+        setAnnouncement(null);
+        setLoading(true);
+
         try {
             const data = await mobileApi.getAnnouncements();
             const found = data.find(a => a.id === Number(id));
@@ -75,12 +78,13 @@ export default function AnnouncementDetailScreen() {
                             lineHeight: 24,
                         }}
                         tagsStyles={{
+                            p: { marginBottom: 8 },
                             a: { color: Colors.primary.DEFAULT },
                             strong: { fontWeight: '700' },
                             em: { fontStyle: 'italic' },
-                            ul: { paddingLeft: Spacing[4] },
-                            ol: { paddingLeft: Spacing[4] },
-                            li: { marginBottom: Spacing[1] },
+                            ul: { marginLeft: 16, marginBottom: 8 },
+                            ol: { marginLeft: 16, marginBottom: 8 },
+                            li: { marginBottom: 4 },
                         }}
                     />
                     <View style={{ marginTop: Spacing[4], paddingTop: Spacing[4], borderTopWidth: 1, borderTopColor: Colors.neutral[200] }}>

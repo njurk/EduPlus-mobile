@@ -27,6 +27,7 @@ export default function DashboardScreen() {
     const [todayLessons, setTodayLessons] = useState<MobileScheduleDto['lessons']>([]);
     const [recentAttendance, setRecentAttendance] = useState<MobileAttendanceRecordDto[]>([]);
     const [refreshing, setRefreshing] = useState(false);
+    const [className, setClassName] = useState<string | null>(null);
 
     const loadData = async () => {
         try {
@@ -45,6 +46,7 @@ export default function DashboardScreen() {
             const todaySchedule = scheduleData?.lessons?.filter(l => l.dayOfWeek === today) || [];
             todaySchedule.sort((a, b) => a.orderNumber - b.orderNumber);
             setTodayLessons(todaySchedule);
+            setClassName(selectedStudent?.className || scheduleData?.className || null);
 
             setRecentAttendance(attendanceData?.recentRecords?.slice(0, 3) || []);
         } catch (error) {
@@ -75,7 +77,10 @@ export default function DashboardScreen() {
                 {hasMultipleChildren ? (
                     <StudentPicker />
                 ) : user?.studentName && (
-                    <Text style={[GlobalStyles.subtitle, { marginTop: Spacing[1] }]}>{getText('studentLabel')} {user.studentName}</Text>
+                    <Text style={[GlobalStyles.subtitle, { marginTop: Spacing[2] }]}>{getText('studentLabel')} {user.studentName}</Text>
+                )}
+                {className && (
+                    <Text style={[GlobalStyles.subtitle, { marginTop: Spacing[2] }]}>Klasa: {className}</Text>
                 )}
             </View>
 
