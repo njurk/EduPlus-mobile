@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 function RootLayoutNav() {
-  const { token, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -16,7 +16,7 @@ function RootLayoutNav() {
     );
   }
 
-  if (!token) {
+  if (!user) {
     return <Redirect href="/(auth)/login" />;
   }
 

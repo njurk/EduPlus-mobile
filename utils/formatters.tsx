@@ -15,8 +15,3 @@ export const formatDate = (dateStr: string) => {
         year: 'numeric',
     });
 };
-
-export const formatAverage = (avg: number | null) => {
-    if (avg === null || avg === undefined) return '-';
-    return avg.toFixed(2);
-};

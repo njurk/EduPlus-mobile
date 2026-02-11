@@ -1,6 +1,7 @@
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
-import { announcementsApi, MobileAnnouncementDto, mobileApi } from '@/services/api';
+import { announcementsApi } from '@/services/api';
+import type { MobileAnnouncementDto } from '@/types';
 import { formatDateTime } from '@/utils/formatters';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -33,7 +34,7 @@ export default function AnnouncementDetailScreen() {
         setLoading(true);
 
         try {
-            const data = await mobileApi.getAnnouncements();
+            const data = await announcementsApi.getAll();
             const found = data.find(a => a.id === Number(id));
             if (found) {
                 setAnnouncement(found);

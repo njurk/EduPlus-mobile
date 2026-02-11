@@ -7,173 +7,13 @@ export const API_URL = `${BASE_URL}/api`;
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
 
-export interface User {
-    id: number;
-    email: string;
-    name: string;
-    roleLevel: number;
-    studentName?: string;
-}
-
-interface BackendLoginResponse {
-    token: string;
-    userId: number;
-    userEmail: string;
-    userName: string;
-    maxRoleLevel: number;
-    studentName?: string;
-}
-
-interface MobileLessonDto {
-    dayOfWeek: number;
-    orderNumber: number;
-    startTime: string;
-    endTime: string;
-    subjectName: string;
-    teacherName: string;
-    classroomName: string;
-}
-
-export interface MobileScheduleDto {
-    classId: number;
-    className: string;
-    semesterId: number;
-    semesterName: string;
-    lessons: MobileLessonDto[];
-}
-
-interface MobileGradeDto {
-    id: number;
-    value: string;
-    categoryName: string;
-    categoryColorHex: string;
-    teacherName: string;
-    comment: string | null;
-    weight: number;
-    createdAt: string;
-}
-
-export interface MobileSubjectGradesDto {
-    subjectId: number;
-    subjectName: string;
-    average: number | null;
-    grades: MobileGradeDto[];
-}
-
-export interface MobileRecentGradeDto {
-    id: number;
-    subjectName: string;
-    value: string;
-    categoryName: string;
-    categoryColorHex: string;
-    teacherName: string;
-    comment: string | null;
-    weight: number;
-    date: string;
-    createdAt: string;
-}
-
-export interface MobileGradesDto {
-    subjects: MobileSubjectGradesDto[];
-    recentGrades: MobileRecentGradeDto[];
-}
-
-export interface MobileSubjectAttendanceDto {
-    subjectName: string;
-    totalLessons: number;
-    present: number;
-    absent: number;
-    late: number;
-    excused: number;
-    attendancePercentage: number;
-}
-
-export interface MobileAttendanceRecordDto {
-    subjectName: string;
-    date: string;
-    type: string;
-    typeColorHex: string;
-}
-
-export interface MobileDailyLessonDto {
-    lessonOrder: number;
-    startTime: string;
-    endTime: string;
-    subjectName: string;
-    attendanceType: string | null;
-    attendanceTypeColorHex: string | null;
-}
-
-export interface MobileAttendanceStatDto {
-    shortCode: string;
-    name: string;
-    colorHex: string;
-    count: number;
-    isNegative: boolean;
-}
-
-export interface MobileAttendanceDto {
-    subjects: MobileSubjectAttendanceDto[];
-    recentRecords: MobileAttendanceRecordDto[];
-    dailyLessons: MobileDailyLessonDto[];
-    stats: MobileAttendanceStatDto[];
-    totalLessons: number;
-}
-
-export interface MobileAnnouncementDto {
-    id: number;
-    title: string;
-    content: string;
-    authorName: string;
-    createdAt: string;
-    updatedAt: string | null;
-    isRead: boolean;
-}
-
-export interface MobileNegativeAttendanceDto {
-    id: number;
-    date: string;
-    subjectName: string;
-    lessonHour: number;
-    attendanceType: string;
-    attendanceTypeColorHex: string;
-}
-
-export interface CreateMobileExcuseDto {
-    attendanceIds: number[];
-    reason: string;
-}
-
-export interface MobileSemesterDto {
-    id: number;
-    name: string;
-    startDate: string;
-    endDate: string;
-    isCurrent: boolean;
-}
-
-export interface MobileChildDto {
-    id: number;
-    name: string;
-    className: string | null;
-}
-
-export interface MobileExcuseAttendanceDto {
-    id: number;
-    subjectName: string;
-    date: string;
-    lessonHour: number;
-    attendanceType: string;
-}
-
-export interface MobileExcuseDto {
-    id: number;
-    reason: string;
-    status: string;
-    statusColorHex: string;
-    createdAt: string;
-    attendances: MobileExcuseAttendanceDto[];
-}
+import type {
+    BackendLoginResponse, ChangePasswordDto, CMSContent,
+    CreateMobileExcuseDto, MobileAnnouncementDto, MobileAttendanceDto,
+    MobileChildDto, MobileExcuseDto, MobileGradesDto,
+    MobileNegativeAttendanceDto, MobileScheduleDto, MobileSemesterDto,
+    TicketReason, User, UserProfile
+} from '@/types';
 
 async function getStoredToken(): Promise<string | null> {
     if (Platform.OS === 'web') {
@@ -264,6 +104,41 @@ async function handleResponse<T>(response: Response): Promise<T | null> {
     return text ? JSON.parse(text) : null;
 }
 
+type QueryParams = Record<string, string | number | Date | undefined>;
+
+function buildQuery(params?: QueryParams): string {
+    if (!params) return '';
+    const sp = new URLSearchParams();
+    for (const [k, v] of Object.entries(params)) {
+        if (v === undefined) continue;
+        if (v instanceof Date) {
+            sp.append(k, `${v.getFullYear()}-${String(v.getMonth() + 1).padStart(2, '0')}-${String(v.getDate()).padStart(2, '0')}`);
+        } else {
+            sp.append(k, String(v));
+        }
+    }
+    const qs = sp.toString();
+    return qs ? `?${qs}` : '';
+}
+
+async function api<T>(method: string, path: string, opts?: { body?: unknown; params?: QueryParams }): Promise<T | null> {
+    const headers = await getHeaders();
+    const response = await fetch(`${API_URL}${path}${buildQuery(opts?.params)}`, {
+        method,
+        headers,
+        ...(opts?.body !== undefined && { body: JSON.stringify(opts.body) }),
+    });
+    return handleResponse<T>(response);
+}
+
+async function publicApi<T>(path: string, body?: unknown): Promise<T | null> {
+    const response = await fetch(`${API_URL}${path}`, {
+        ...(body !== undefined && { method: 'POST', body: JSON.stringify(body) }),
+        headers: { 'Content-Type': 'application/json' },
+    });
+    return handleResponse<T>(response);
+}
+
 export const authApi = {
     async loginMobile(email: string, password: string): Promise<{ token: string; user: User }> {
         const response = await fetch(`${API_URL}/auth/login/mobile`, {
@@ -292,160 +167,91 @@ export const authApi = {
     },
 
     async logout(): Promise<void> {
-        const headers = await getHeaders();
         try {
-            await fetch(`${API_URL}/auth/logout`, { method: 'POST', headers });
+            await api('POST', '/auth/logout');
         } catch { }
         await removeToken();
         await removeUser();
     },
 
     async requestPasswordReset(email: string): Promise<void> {
-        const response = await fetch(`${API_URL}/passwordreset/request`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email }),
-        });
-        await handleResponse(response);
+        await publicApi('/passwordreset/request', { email });
     },
 
     getStoredToken,
     getStoredUser,
-    storeToken,
-    storeUser,
-    removeToken,
-    removeUser,
 };
 
-export const mobileApi = {
-    async getChildren(): Promise<MobileChildDto[]> {
-        const headers = await getHeaders();
-        const response = await fetch(`${API_URL}/mobile/children`, { headers });
-        const data = await handleResponse<MobileChildDto[]>(response);
-        return data ?? [];
+export const studentsApi = {
+    async getAll(): Promise<MobileChildDto[]> {
+        return (await api<MobileChildDto[]>('GET', '/mobile/children')) ?? [];
     },
+};
 
-    async getSchedule(studentId?: number): Promise<MobileScheduleDto | null> {
+export const scheduleApi = {
+    async get(studentId?: number): Promise<MobileScheduleDto | null> {
         const headers = await getHeaders();
-        const params = studentId ? `?studentId=${studentId}` : '';
-        const response = await fetch(`${API_URL}/mobile/schedule${params}`, { headers });
+        const response = await fetch(`${API_URL}/mobile/schedule${buildQuery({ studentId })}`, { headers });
         if (response.status === 404) return null;
         return handleResponse<MobileScheduleDto>(response);
     },
+};
 
-    async getGrades(studentId?: number, semesterId?: number): Promise<MobileGradesDto> {
-        const headers = await getHeaders();
-        const params = new URLSearchParams();
-        if (studentId) params.append('studentId', studentId.toString());
-        if (semesterId) params.append('semesterId', semesterId.toString());
-        const qs = params.toString() ? `?${params.toString()}` : '';
-        const response = await fetch(`${API_URL}/mobile/grades${qs}`, { headers });
-        const data = await handleResponse<MobileGradesDto>(response);
-        return data ?? { subjects: [], recentGrades: [] };
+export const gradesApi = {
+    async getAll(studentId?: number, semesterId?: number): Promise<MobileGradesDto> {
+        return (await api<MobileGradesDto>('GET', '/mobile/grades', { params: { studentId, semesterId } })) ?? { subjects: [], recentGrades: [] };
+    },
+};
+
+export const attendanceApi = {
+    async getAll(studentId?: number, semesterId?: number, date?: Date): Promise<MobileAttendanceDto> {
+        return (await api<MobileAttendanceDto>('GET', '/mobile/attendance', { params: { studentId, semesterId, date } })) ?? { subjects: [], recentRecords: [], dailyLessons: [], stats: [], totalLessons: 0 };
     },
 
-    async getAttendance(studentId?: number, semesterId?: number, date?: string): Promise<MobileAttendanceDto> {
-        const headers = await getHeaders();
-        const params = new URLSearchParams();
-        if (studentId) params.append('studentId', studentId.toString());
-        if (semesterId) params.append('semesterId', semesterId.toString());
-        if (date) params.append('date', date);
-        const qs = params.toString() ? `?${params.toString()}` : '';
-        const response = await fetch(`${API_URL}/mobile/attendance${qs}`, { headers });
-        const data = await handleResponse<MobileAttendanceDto>(response);
-        return data ?? { subjects: [], recentRecords: [], dailyLessons: [], stats: [], totalLessons: 0 };
-    },
-
-    async getAnnouncements(): Promise<MobileAnnouncementDto[]> {
-        const headers = await getHeaders();
-        const response = await fetch(`${API_URL}/mobile/announcements`, { headers });
-        const data = await handleResponse<MobileAnnouncementDto[]>(response);
-        return data ?? [];
-    },
-
-    async getNegativeAttendances(studentId?: number, semesterId?: number): Promise<MobileNegativeAttendanceDto[]> {
-        const headers = await getHeaders();
-        const params = new URLSearchParams();
-        if (studentId) params.append('studentId', studentId.toString());
-        if (semesterId) params.append('semesterId', semesterId.toString());
-        const qs = params.toString() ? `?${params.toString()}` : '';
-        const response = await fetch(`${API_URL}/mobile/negative-attendances${qs}`, { headers });
-        const data = await handleResponse<MobileNegativeAttendanceDto[]>(response);
-        return data ?? [];
-    },
-
-    async getExcuses(studentId?: number, semesterId?: number): Promise<MobileExcuseDto[]> {
-        const headers = await getHeaders();
-        const params = new URLSearchParams();
-        if (studentId) params.append('studentId', studentId.toString());
-        if (semesterId) params.append('semesterId', semesterId.toString());
-        const qs = params.toString() ? `?${params.toString()}` : '';
-        const response = await fetch(`${API_URL}/mobile/excuses${qs}`, { headers });
-        const data = await handleResponse<MobileExcuseDto[]>(response);
-        return data ?? [];
-    },
-
-    async getSemesters(): Promise<MobileSemesterDto[]> {
-        const headers = await getHeaders();
-        const response = await fetch(`${API_URL}/mobile/semesters`, { headers });
-        const data = await handleResponse<MobileSemesterDto[]>(response);
-        return data ?? [];
-    },
-
-    async createExcuse(studentId: number | undefined, dto: CreateMobileExcuseDto): Promise<void> {
-        const headers = await getHeaders();
-        const params = studentId ? `?studentId=${studentId}` : '';
-        const response = await fetch(`${API_URL}/mobile/excuse${params}`, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(dto),
-        });
-        await handleResponse(response);
+    async getNegative(studentId?: number, semesterId?: number): Promise<MobileNegativeAttendanceDto[]> {
+        return (await api<MobileNegativeAttendanceDto[]>('GET', '/mobile/negative-attendances', { params: { studentId, semesterId } })) ?? [];
     },
 };
 
 export const announcementsApi = {
+    async getAll(): Promise<MobileAnnouncementDto[]> {
+        return (await api<MobileAnnouncementDto[]>('GET', '/mobile/announcements')) ?? [];
+    },
+
     async markAsRead(id: number): Promise<void> {
-        const headers = await getHeaders();
-        await fetch(`${API_URL}/announcement/${id}/read`, { method: 'POST', headers });
+        await api('POST', `/announcement/${id}/read`);
     },
 };
 
-export interface TicketReason {
-    id: number;
-    name: string;
-}
+export const excusesApi = {
+    async getAll(studentId?: number, semesterId?: number): Promise<MobileExcuseDto[]> {
+        return (await api<MobileExcuseDto[]>('GET', '/mobile/excuses', { params: { studentId, semesterId } })) ?? [];
+    },
+
+    async create(studentId: number | undefined, dto: CreateMobileExcuseDto): Promise<void> {
+        await api('POST', '/mobile/excuse', { body: dto, params: { studentId } });
+    },
+};
+
+export const semestersApi = {
+    async getAll(): Promise<MobileSemesterDto[]> {
+        return (await api<MobileSemesterDto[]>('GET', '/mobile/semesters')) ?? [];
+    },
+};
 
 export const ticketsApi = {
     async getReasons(): Promise<TicketReason[]> {
-        const response = await fetch(`${API_URL}/ticketreason/active`, {
-            headers: { 'Content-Type': 'application/json' },
-        });
-        const data = await handleResponse<TicketReason[]>(response);
-        return data ?? [];
+        return (await publicApi<TicketReason[]>('/ticketreason/active')) ?? [];
     },
 
     async createAnonymous(data: { email: string; content: string; reasonId: number }): Promise<void> {
-        const response = await fetch(`${API_URL}/ticket`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        });
-        await handleResponse(response);
+        await publicApi('/ticket', data);
     },
 };
 
-export interface CMSContent {
-    key: string;
-    value: string;
-}
-
 export const cmsApi = {
     async getPublicContent(pageLabel: string): Promise<Record<string, string>> {
-        const response = await fetch(`${API_URL}/pagecontent/by-label/${pageLabel}`, {
-            headers: { 'Content-Type': 'application/json' },
-        });
-        const data = await handleResponse<CMSContent[]>(response);
+        const data = await publicApi<CMSContent[]>(`/pagecontent/by-label/${pageLabel}`);
         if (!data) return {};
         return data.reduce((acc, item) => {
             acc[item.key] = item.value;
@@ -454,48 +260,18 @@ export const cmsApi = {
     },
 };
 
-export interface UserProfile {
-    id: number;
-    email: string;
-    firstName: string;
-    lastName: string;
-    phone: string | null;
-    street: string | null;
-    city: string | null;
-    postalCode: string | null;
-}
-
-export interface ChangePasswordDto {
-    currentPassword: string;
-    newPassword: string;
-}
-
 export const usersApi = {
     async get(id: number): Promise<UserProfile> {
-        const headers = await getHeaders();
-        const response = await fetch(`${API_URL}/user/${id}`, { headers });
-        const data = await handleResponse<UserProfile>(response);
+        const data = await api<UserProfile>('GET', `/user/${id}`);
         if (!data) throw new Error('Nie udało się pobrać danych użytkownika');
         return data;
     },
 
     async update(id: number, data: Partial<UserProfile>): Promise<void> {
-        const headers = await getHeaders();
-        const response = await fetch(`${API_URL}/user/${id}`, {
-            method: 'PUT',
-            headers,
-            body: JSON.stringify(data),
-        });
-        await handleResponse(response);
+        await api('PUT', `/user/${id}`, { body: data });
     },
 
     async changePassword(id: number, data: ChangePasswordDto): Promise<void> {
-        const headers = await getHeaders();
-        const response = await fetch(`${API_URL}/user/${id}/change-password`, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(data),
-        });
-        await handleResponse(response);
+        await api('PATCH', `/user/${id}/change-password`, { body: data });
     },
 };

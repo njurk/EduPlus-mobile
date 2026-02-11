@@ -178,20 +178,6 @@ export const GlobalStyles = StyleSheet.create({
         fontWeight: '700',
         color: Colors.white,
     },
-
-    attendanceBadge: {
-        width: 34,
-        height: 34,
-        borderRadius: 3,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    attendanceBadgeText: {
-        color: Colors.white,
-        fontSize: FontSizes.xs,
-        fontWeight: '600',
-    },
-
     statBox: {
         flex: 1,
         alignItems: 'center',
@@ -311,17 +297,5 @@ export const GlobalStyles = StyleSheet.create({
         fontSize: FontSizes.xl,
         fontWeight: '700',
         color: Colors.neutral[900],
-    },
-    button: {
-        backgroundColor: Colors.primary.DEFAULT,
-        borderRadius: BorderRadius.sm,
-        paddingVertical: Spacing[3],
-        paddingHorizontal: Spacing[4],
-        alignItems: 'center',
-    },
-    buttonText: {
-        color: Colors.white,
-        fontSize: FontSizes.base,
-        fontWeight: '600',
     },
 });

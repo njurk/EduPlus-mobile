@@ -1,8 +1,11 @@
+import StatusBadge from '@/components/StatusBadge';
 import { GlobalStyles } from '@/constants/styles';
+import { DAY_NAMES_SHORT_W, MONTH_NAMES_SHORT } from '@/constants/locale';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useStudent } from '@/contexts/StudentContext';
 import { useCMSContent } from '@/hooks/useCMSContent';
-import { mobileApi, MobileAttendanceStatDto, MobileDailyLessonDto, MobileSubjectAttendanceDto } from '@/services/api';
+import { attendanceApi } from '@/services/api';
+import type { MobileAttendanceStatDto, MobileDailyLessonDto, MobileSubjectAttendanceDto } from '@/types';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import {
@@ -13,9 +16,6 @@ import {
     View,
 } from 'react-native';
 import PieChart from 'react-native-pie-chart';
-
-const MONTH_NAMES = ['STY', 'LUT', 'MAR', 'KWI', 'MAJ', 'CZE', 'LIP', 'SIE', 'WRZ', 'PAŹ', 'LIS', 'GRU'];
-const DAY_NAMES = ['nie', 'pon', 'wt', 'śr', 'czw', 'pt', 'sob'];
 
 type TabType = 'week' | 'stats';
 
@@ -33,9 +33,7 @@ const getWeekDays = (baseDate: Date) => {
     return days;
 };
 
-const formatDateForApi = (date: Date) => {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-};
+
 
 export default function AttendanceScreen() {
     const { selectedStudent } = useStudent();
@@ -52,7 +50,7 @@ export default function AttendanceScreen() {
 
     const loadData = async (date: Date) => {
         try {
-            const data = await mobileApi.getAttendance(selectedStudent?.id, undefined, formatDateForApi(date));
+            const data = await attendanceApi.getAll(selectedStudent?.id, undefined, date);
             setDailyLessons(data.dailyLessons);
             setSubjects(data.subjects);
             setStats(data.stats);
@@ -99,11 +97,7 @@ export default function AttendanceScreen() {
 
     const getAttendanceIcon = (type: string | null, color: string | null) => {
         if (!type) return null;
-        return (
-            <View style={[GlobalStyles.attendanceBadge, { backgroundColor: color || Colors.neutral[200] }]}>
-                <Text style={GlobalStyles.attendanceBadgeText}>{type}</Text>
-            </View>
-        );
+        return <StatusBadge label={type} color={color || Colors.neutral[200]} />;
     };
 
     const renderWeekTab = () => (
@@ -113,7 +107,7 @@ export default function AttendanceScreen() {
                     <Text style={{ fontSize: FontSizes.lg, color: Colors.primary.DEFAULT }}>‹</Text>
                 </TouchableOpacity>
                 <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: Colors.primary.DEFAULT, marginHorizontal: Spacing[2] }}>
-                    {MONTH_NAMES[weekDays[0].getMonth()]}
+                    {MONTH_NAMES_SHORT[weekDays[0].getMonth()]}
                 </Text>
                 {weekDays.map((day, index) => {
                     const isSelected = day.toDateString() === selectedDate.toDateString();
@@ -134,7 +128,7 @@ export default function AttendanceScreen() {
                                 fontSize: FontSizes.xs,
                                 color: isSelected ? '#fff' : isToday ? Colors.primary.DEFAULT : Colors.neutral[500],
                             }}>
-                                {DAY_NAMES[day.getDay()]}
+                                {DAY_NAMES_SHORT_W[day.getDay()]}
                             </Text>
                             <Text style={{
                                 fontSize: FontSizes.base,
@@ -162,8 +156,8 @@ export default function AttendanceScreen() {
                     <View key={index} style={[GlobalStyles.cardSmall, { flexDirection: 'row', alignItems: 'center' }]}>
                         {getAttendanceIcon(lesson.attendanceType, lesson.attendanceTypeColorHex)}
                         {!lesson.attendanceType && (
-                            <View style={[GlobalStyles.attendanceBadge, { backgroundColor: Colors.neutral[100] }]}>
-                                <Text style={{ color: Colors.neutral[400], fontSize: FontSizes.xs }}>–</Text>
+                            <View style={[GlobalStyles.gradeBox, { backgroundColor: Colors.neutral[100] }]}>
+                                <Text style={{ color: Colors.neutral[400], fontSize: FontSizes.xs }}>-</Text>
                             </View>
                         )}
                         <View style={{ flex: 1, marginLeft: Spacing[3] }}>

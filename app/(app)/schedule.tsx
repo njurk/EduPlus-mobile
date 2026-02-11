@@ -1,7 +1,9 @@
 import { GlobalStyles } from '@/constants/styles';
+import { DAY_NAMES_SHORT } from '@/constants/locale';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useStudent } from '@/contexts/StudentContext';
-import { mobileApi, MobileScheduleDto } from '@/services/api';
+import { scheduleApi } from '@/services/api';
+import type { MobileScheduleDto } from '@/types';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import {
@@ -12,7 +14,6 @@ import {
     View,
 } from 'react-native';
 
-const DAYS = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt'];
 
 export default function ScheduleScreen() {
     const { selectedStudent } = useStudent();
@@ -23,7 +24,7 @@ export default function ScheduleScreen() {
 
     const loadData = async () => {
         try {
-            const data = await mobileApi.getSchedule(selectedStudent?.id);
+            const data = await scheduleApi.get(selectedStudent?.id);
             setSchedule(data);
         } catch { } finally {
             setLoading(false);
@@ -49,7 +50,7 @@ export default function ScheduleScreen() {
     return (
         <View style={GlobalStyles.screen}>
             <View style={[GlobalStyles.row, { paddingHorizontal: Spacing[4], paddingVertical: Spacing[4], gap: Spacing[2] }]}>
-                {DAYS.map((day, index) => (
+                {DAY_NAMES_SHORT.map((day, index) => (
                     <TouchableOpacity
                         key={index}
                         style={[GlobalStyles.dayButton, { flex: 1 }, selectedDay === index && GlobalStyles.dayButtonActive]}

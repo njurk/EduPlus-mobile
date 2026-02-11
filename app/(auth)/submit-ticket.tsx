@@ -1,7 +1,8 @@
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useCMSContent } from '@/hooks/useCMSContent';
-import { TicketReason, ticketsApi } from '@/services/api';
+import { ticketsApi } from '@/services/api';
+import type { TicketReason } from '@/types';
 import { validateTicketForm } from '@/utils/validation';
 import { router } from 'expo-router';
 import { ChevronDown } from 'lucide-react-native';

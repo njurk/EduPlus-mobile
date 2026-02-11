@@ -1,7 +1,9 @@
+import StatusBadge from '@/components/StatusBadge';
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useStudent } from '@/contexts/StudentContext';
-import { MobileNegativeAttendanceDto, mobileApi } from '@/services/api';
+import { excusesApi } from '@/services/api';
+import type { MobileNegativeAttendanceDto } from '@/types';
 import { formatDate } from '@/utils/formatters';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
@@ -33,7 +35,7 @@ export default function ExcuseFormScreen() {
 
         setSubmitting(true);
         try {
-            await mobileApi.createExcuse(selectedStudent?.id, {
+            await excusesApi.create(selectedStudent?.id, {
                 attendanceIds: selectedItems.map(item => item.id),
                 reason: reason.trim(),
             });
@@ -72,16 +74,7 @@ export default function ExcuseFormScreen() {
                                 {formatDate(item.date)}, lekcja {item.lessonHour}
                             </Text>
                         </View>
-                        <View style={{
-                            backgroundColor: item.attendanceTypeColorHex,
-                            paddingHorizontal: Spacing[2],
-                            paddingVertical: Spacing[1],
-                            borderRadius: 4,
-                        }}>
-                            <Text style={{ color: '#fff', fontSize: FontSizes.sm, fontWeight: '600' }}>
-                                {item.attendanceType}
-                            </Text>
-                        </View>
+                        <StatusBadge label={item.attendanceType} color={item.attendanceTypeColorHex} />
                     </View>
                 ))}
 
@@ -109,7 +102,7 @@ export default function ExcuseFormScreen() {
                 <View style={{ paddingTop: Spacing[4] }}>
                     <TouchableOpacity
                         style={[
-                            GlobalStyles.button,
+                            GlobalStyles.buttonPrimary,
                             { opacity: submitting || !reason.trim() ? 0.5 : 1 }
                         ]}
                         onPress={handleSubmit}
@@ -118,7 +111,7 @@ export default function ExcuseFormScreen() {
                         {submitting ? (
                             <ActivityIndicator color="#fff" />
                         ) : (
-                            <Text style={GlobalStyles.buttonText}>Wyślij</Text>
+                            <Text style={GlobalStyles.buttonPrimaryText}>Wyślij</Text>
                         )}
                     </TouchableOpacity>
                 </View>

@@ -1,10 +1,13 @@
+import StatusBadge from '@/components/StatusBadge';
 import StudentPicker from '@/components/StudentPicker';
 import { GlobalStyles } from '@/constants/styles';
+import { DAY_NAMES_FULL } from '@/constants/locale';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStudent } from '@/contexts/StudentContext';
 import { useCMSContent } from '@/hooks/useCMSContent';
-import { MobileAnnouncementDto, mobileApi, MobileAttendanceRecordDto, MobileRecentGradeDto, MobileScheduleDto } from '@/services/api';
+import { announcementsApi, attendanceApi, gradesApi, scheduleApi } from '@/services/api';
+import type { MobileAnnouncementDto, MobileAttendanceRecordDto, MobileRecentGradeDto, MobileScheduleDto } from '@/types';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import React, { useCallback, useState } from 'react';
@@ -15,8 +18,6 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-
-const DAY_NAMES = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota'];
 
 export default function DashboardScreen() {
     const { user } = useAuth();
@@ -33,10 +34,10 @@ export default function DashboardScreen() {
         try {
             const studentId = selectedStudent?.id;
             const [gradesData, announcementsData, scheduleData, attendanceData] = await Promise.all([
-                mobileApi.getGrades(studentId),
-                mobileApi.getAnnouncements(),
-                mobileApi.getSchedule(studentId),
-                mobileApi.getAttendance(studentId),
+                gradesApi.getAll(studentId),
+                announcementsApi.getAll(),
+                scheduleApi.get(studentId),
+                attendanceApi.getAll(studentId),
             ]);
 
             setRecentGrades(gradesData?.recentGrades?.slice(0, 3) || []);
@@ -85,7 +86,7 @@ export default function DashboardScreen() {
             </View>
 
             <View style={GlobalStyles.card}>
-                <Text style={GlobalStyles.cardTitle}>{getText('lessonsToday').replace('{day}', DAY_NAMES[new Date().getDay()])}</Text>
+                <Text style={GlobalStyles.cardTitle}>{getText('lessonsToday').replace('{day}', DAY_NAMES_FULL[new Date().getDay()])}</Text>
                 {todayLessons.length === 0 ? (
                     <Text style={GlobalStyles.emptyText}>Brak</Text>
                 ) : (
@@ -135,9 +136,7 @@ export default function DashboardScreen() {
                     recentAttendance.map((record, index) => (
                         <View key={index} style={[GlobalStyles.rowBetween, GlobalStyles.divider]}>
                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing[3] }}>
-                                <View style={[GlobalStyles.attendanceBadge, { backgroundColor: record.typeColorHex || Colors.neutral[200] }]}>
-                                    <Text style={GlobalStyles.attendanceBadgeText}>{record.type}</Text>
-                                </View>
+                                <StatusBadge label={record.type} color={record.typeColorHex || Colors.neutral[200]} />
                                 <Text style={GlobalStyles.subtitle}>{record.subjectName}</Text>
                             </View>
                             <Text style={{ fontSize: FontSizes.xs, color: Colors.neutral[400] }}>{record.date}</Text>

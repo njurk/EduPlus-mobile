@@ -1,25 +1,26 @@
+import ListState from '@/components/ListState';
 import SemesterPicker from '@/components/SemesterPicker';
+import StatusBadge from '@/components/StatusBadge';
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useStudent } from '@/contexts/StudentContext';
+import { useSemesterLoader } from '@/hooks/useSemesterLoader';
 import { useCMSContent } from '@/hooks/useCMSContent';
-import { MobileExcuseDto, MobileNegativeAttendanceDto, mobileApi } from '@/services/api';
+import { attendanceApi, excusesApi } from '@/services/api';
+import type { MobileExcuseDto, MobileNegativeAttendanceDto } from '@/types';
 import { formatDate } from '@/utils/formatters';
-import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react-native';
-import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ExcusesScreen() {
     const { selectedStudent } = useStudent();
     const { getText } = useCMSContent('mobileExcuses');
-    const [currentSemesterId, setCurrentSemesterId] = useState<number | null>(null);
     const [attendances, setAttendances] = useState<MobileNegativeAttendanceDto[]>([]);
     const [excuses, setExcuses] = useState<MobileExcuseDto[]>([]);
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
     const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
     const [expandedSection, setExpandedSection] = useState<'unexcused' | 'excused' | null>('unexcused');
     const [expandedExcuseId, setExpandedExcuseId] = useState<number | null>(null);
 
@@ -27,8 +28,8 @@ export default function ExcusesScreen() {
         setLoading(true);
         try {
             const [negativeData, excusesData] = await Promise.all([
-                mobileApi.getNegativeAttendances(selectedStudent?.id, semesterId),
-                mobileApi.getExcuses(selectedStudent?.id, semesterId)
+                attendanceApi.getNegative(selectedStudent?.id, semesterId),
+                excusesApi.getAll(selectedStudent?.id, semesterId)
             ]);
             setAttendances(negativeData);
             setExcuses(excusesData);
@@ -36,24 +37,10 @@ export default function ExcusesScreen() {
         } catch {
         } finally {
             setLoading(false);
-            setRefreshing(false);
         }
     };
 
-    useFocusEffect(useCallback(() => {
-        if (currentSemesterId) loadData(currentSemesterId);
-    }, [selectedStudent, currentSemesterId]));
-
-    const onSemesterChange = (id: number) => {
-        setCurrentSemesterId(id);
-        loadData(id);
-    };
-
-    const onRefresh = useCallback(() => {
-        if (!currentSemesterId) return;
-        setRefreshing(true);
-        loadData(currentSemesterId);
-    }, [currentSemesterId]);
+    const { onSemesterChange, refreshControl } = useSemesterLoader(loadData);
 
     const toggleSelection = (id: number) => {
         setSelectedIds(prev => {
@@ -74,15 +61,11 @@ export default function ExcusesScreen() {
         <View style={GlobalStyles.screen}>
             <ScrollView
                 contentContainerStyle={GlobalStyles.scrollContent}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary.DEFAULT]} />}
+                refreshControl={refreshControl}
             >
                 <SemesterPicker onSemesterChange={onSemesterChange} />
 
-                {loading ? (
-                    <View style={[GlobalStyles.emptyContainer, { paddingTop: Spacing[8] }]}>
-                        <ActivityIndicator size="large" color={Colors.primary.DEFAULT} />
-                    </View>
-                ) : (
+                <ListState loading={loading} empty={attendances.length === 0 && excuses.length === 0}>
                     <>
                         <TouchableOpacity
                             style={[GlobalStyles.cardSmall, { marginBottom: expandedSection === 'unexcused' ? 0 : Spacing[3] }]}
@@ -115,9 +98,7 @@ export default function ExcusesScreen() {
                                                 <Text style={{ fontSize: FontSizes.base, fontWeight: '600', color: Colors.neutral[800] }}>{attendance.subjectName}</Text>
                                                 <Text style={GlobalStyles.caption}>{formatDate(attendance.date)}, lekcja {attendance.lessonHour}</Text>
                                             </View>
-                                            <View style={{ backgroundColor: attendance.attendanceTypeColorHex, paddingHorizontal: Spacing[2], paddingVertical: Spacing[1], borderRadius: 4 }}>
-                                                <Text style={{ color: '#fff', fontSize: FontSizes.sm, fontWeight: '600' }}>{attendance.attendanceType}</Text>
-                                            </View>
+                                            <StatusBadge label={attendance.attendanceType} color={attendance.attendanceTypeColorHex} />
                                         </TouchableOpacity>
                                     );
                                 })}
@@ -151,9 +132,7 @@ export default function ExcusesScreen() {
                                                 <Text style={GlobalStyles.title}>{formatDate(excuse.createdAt)}</Text>
                                                 <Text style={[GlobalStyles.subtitle, { fontWeight: '400' }]} numberOfLines={expandedExcuseId === excuse.id ? undefined : 2}>{excuse.reason}</Text>
                                             </View>
-                                            <View style={{ backgroundColor: excuse.statusColorHex, paddingHorizontal: Spacing[2], paddingVertical: Spacing[1], borderRadius: 4, marginLeft: Spacing[2] }}>
-                                                <Text style={{ color: '#fff', fontSize: FontSizes.sm, fontWeight: '600' }}>{excuse.status}</Text>
-                                            </View>
+                                            <StatusBadge label={excuse.status} color={excuse.statusColorHex} />
                                         </View>
                                         {expandedExcuseId === excuse.id && (
                                             <View style={{ marginTop: Spacing[2], paddingTop: Spacing[2], borderTopWidth: 1, borderTopColor: Colors.neutral[200] }}>
@@ -168,17 +147,17 @@ export default function ExcusesScreen() {
                             </View>
                         )}
                     </>
-                )}
+                </ListState>
             </ScrollView>
 
             {expandedSection === 'unexcused' && attendances.length > 0 && (
                 <View style={{ padding: Spacing[4], backgroundColor: Colors.neutral[100] }}>
                     <TouchableOpacity
-                        style={[GlobalStyles.button, { opacity: selectedIds.size === 0 ? 0.5 : 1 }]}
+                        style={[GlobalStyles.buttonPrimary, { opacity: selectedIds.size === 0 ? 0.5 : 1 }]}
                         onPress={handleExcuse}
                         disabled={selectedIds.size === 0}
                     >
-                        <Text style={GlobalStyles.buttonText}>Usprawiedliw ({selectedIds.size})</Text>
+                        <Text style={GlobalStyles.buttonPrimaryText}>Usprawiedliw ({selectedIds.size})</Text>
                     </TouchableOpacity>
                 </View>
             )}

@@ -1,7 +1,9 @@
+import MessageBanner from '@/components/MessageBanner';
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserProfile, usersApi } from '@/services/api';
+import { usersApi } from '@/services/api';
+import type { UserProfile } from '@/types';
 import { PASSWORD_RULES, validatePasswordChange, validateProfileForm } from '@/utils/validation';
 import { CheckCircle, Lock, User, XCircle } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
@@ -137,16 +139,7 @@ export default function SettingsScreen() {
                     </View>
 
                     {profileMessage && (
-                        <View style={{
-                            backgroundColor: profileMessage.type === 'success' ? Colors.success.light : Colors.danger.light,
-                            padding: Spacing[3],
-                            borderRadius: 8,
-                            marginBottom: Spacing[4]
-                        }}>
-                            <Text style={{ color: profileMessage.type === 'success' ? Colors.success.text : Colors.danger.text, fontSize: FontSizes.sm }}>
-                                {profileMessage.text}
-                            </Text>
-                        </View>
+                        <MessageBanner type={profileMessage.type} text={profileMessage.text} />
                     )}
 
                     <View style={GlobalStyles.inputGroup}>
@@ -248,16 +241,7 @@ export default function SettingsScreen() {
                     </View>
 
                     {passwordMessage && (
-                        <View style={{
-                            backgroundColor: passwordMessage.type === 'success' ? Colors.success.light : Colors.danger.light,
-                            padding: Spacing[3],
-                            borderRadius: 8,
-                            marginBottom: Spacing[4]
-                        }}>
-                            <Text style={{ color: passwordMessage.type === 'success' ? Colors.success.text : Colors.danger.text, fontSize: FontSizes.sm }}>
-                                {passwordMessage.text}
-                            </Text>
-                        </View>
+                        <MessageBanner type={passwordMessage.type} text={passwordMessage.text} />
                     )}
 
                     <View style={GlobalStyles.inputGroup}>

@@ -1,6 +1,7 @@
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, Spacing } from '@/constants/theme';
-import { MobileAnnouncementDto, mobileApi } from '@/services/api';
+import { announcementsApi } from '@/services/api';
+import type { MobileAnnouncementDto } from '@/types';
 import { formatDate } from '@/utils/formatters';
 import { useFocusEffect } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -21,7 +22,7 @@ export default function AnnouncementsScreen() {
 
     const loadData = async () => {
         try {
-            const data = await mobileApi.getAnnouncements();
+            const data = await announcementsApi.getAll();
             setAnnouncements(data);
         } catch { } finally {
             setLoading(false);

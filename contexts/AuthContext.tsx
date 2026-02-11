@@ -1,9 +1,9 @@
-import { authApi, setOnUnauthorized, User } from '@/services/api';
+import { authApi, setOnUnauthorized } from '@/services/api';
+import type { User } from '@/types';
 import React, { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 
 interface AuthContextType {
     user: User | null;
-    token: string | null;
     isLoading: boolean;
     isParent: boolean;
     isStudent: boolean;
@@ -13,20 +13,12 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-interface AuthProviderProps {
-    children: ReactNode;
-}
-
-export function AuthProvider({ children }: AuthProviderProps) {
+export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
-    const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        setOnUnauthorized(() => {
-            setToken(null);
-            setUser(null);
-        });
+        setOnUnauthorized(() => setUser(null));
     }, []);
 
     useEffect(() => {
@@ -37,7 +29,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
                     authApi.getStoredUser(),
                 ]);
                 if (storedToken && storedUser) {
-                    setToken(storedToken);
                     setUser(storedUser);
                 }
             } catch (error) {
@@ -51,13 +42,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const login = useCallback(async (email: string, password: string) => {
         const response = await authApi.loginMobile(email, password);
-        setToken(response.token);
         setUser(response.user);
     }, []);
 
     const logout = useCallback(async () => {
         await authApi.logout();
-        setToken(null);
         setUser(null);
     }, []);
 
@@ -65,7 +54,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const isStudent = user?.roleLevel === 4;
 
     return (
-        <AuthContext.Provider value={{ user, token, isLoading, isParent, isStudent, login, logout }}>
+        <AuthContext.Provider value={{ user, isLoading, isParent, isStudent, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

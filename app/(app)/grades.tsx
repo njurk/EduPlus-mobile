@@ -1,16 +1,15 @@
+import ListState from '@/components/ListState';
 import SemesterPicker from '@/components/SemesterPicker';
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
-import { useStudent } from '@/contexts/StudentContext';
-import { mobileApi, MobileSubjectGradesDto } from '@/services/api';
-import { formatAverage, formatDateTime } from '@/utils/formatters';
-import { useFocusEffect } from '@react-navigation/native';
+import { useSemesterLoader } from '@/hooks/useSemesterLoader';
+import { gradesApi } from '@/services/api';
+import type { MobileSubjectGradesDto } from '@/types';
+import { formatDate, formatDateTime } from '@/utils/formatters';
 import { useLocalSearchParams } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
     Modal,
-    RefreshControl,
     ScrollView,
     Text,
     TouchableOpacity,
@@ -30,31 +29,24 @@ interface GradeDetail {
 }
 
 export default function GradesScreen() {
-    const { selectedStudent } = useStudent();
-    const [currentSemesterId, setCurrentSemesterId] = useState<number | null>(null);
     const [subjects, setSubjects] = useState<MobileSubjectGradesDto[]>([]);
     const [expandedSubject, setExpandedSubject] = useState<number | null>(null);
     const [selectedGrade, setSelectedGrade] = useState<GradeDetail | null>(null);
-    const [refreshing, setRefreshing] = useState(false);
     const [loading, setLoading] = useState(true);
 
     const loadData = async (semesterId: number) => {
         setLoading(true);
         setExpandedSubject(null);
         try {
-            const data = await mobileApi.getGrades(selectedStudent?.id, semesterId);
+            const data = await gradesApi.getAll(undefined, semesterId);
             setSubjects(data.subjects);
         } catch { } finally {
             setLoading(false);
-            setRefreshing(false);
         }
     };
 
+    const { onSemesterChange, refreshControl } = useSemesterLoader(loadData);
     const { openGradeId } = useLocalSearchParams<{ openGradeId?: string }>();
-
-    useFocusEffect(useCallback(() => {
-        if (currentSemesterId) loadData(currentSemesterId);
-    }, [selectedStudent, currentSemesterId]));
 
     useEffect(() => {
         if (openGradeId && subjects.length > 0) {
@@ -70,36 +62,17 @@ export default function GradesScreen() {
         }
     }, [openGradeId, subjects]);
 
-    const onSemesterChange = (id: number) => {
-        setCurrentSemesterId(id);
-        loadData(id);
-    };
-
-    const onRefresh = async () => {
-        if (!currentSemesterId) return;
-        setRefreshing(true);
-        await loadData(currentSemesterId);
-    };
-
     return (
         <View style={{ flex: 1 }}>
             <ScrollView
                 style={GlobalStyles.screen}
                 contentContainerStyle={GlobalStyles.scrollContent}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary.DEFAULT]} />}
+                refreshControl={refreshControl}
             >
                 <SemesterPicker onSemesterChange={onSemesterChange} />
 
-                {loading ? (
-                    <View style={[GlobalStyles.emptyContainer, { paddingTop: Spacing[8] }]}>
-                        <ActivityIndicator size="large" color={Colors.primary.DEFAULT} />
-                    </View>
-                ) : subjects.length === 0 ? (
-                    <View style={GlobalStyles.emptyContainer}>
-                        <Text style={GlobalStyles.emptyText}>Brak</Text>
-                    </View>
-                ) : (
-                    subjects.map((subject) => (
+                <ListState loading={loading} empty={subjects.length === 0}>
+                    {subjects.map((subject) => (
                         <TouchableOpacity
                             key={subject.subjectId}
                             style={GlobalStyles.cardSmall}
@@ -111,7 +84,7 @@ export default function GradesScreen() {
                                 <View style={{ alignItems: 'flex-end' }}>
                                     <Text style={GlobalStyles.caption}>Średnia</Text>
                                     <Text style={{ fontSize: FontSizes.lg, fontWeight: '700', color: Colors.primary.DEFAULT }}>
-                                        {formatAverage(subject.average)}
+                                        {subject.average?.toFixed(2) ?? '-'}
                                     </Text>
                                 </View>
                             </View>
@@ -136,15 +109,15 @@ export default function GradesScreen() {
                                                 <Text style={GlobalStyles.caption}>{grade.teacherName}</Text>
                                             </View>
                                             <Text style={GlobalStyles.caption}>
-                                                {new Date(grade.createdAt).toLocaleDateString('pl-PL')}
+                                                {formatDate(grade.createdAt)}
                                             </Text>
                                         </TouchableOpacity>
                                     ))}
                                 </View>
                             )}
                         </TouchableOpacity>
-                    ))
-                )}
+                    ))}
+                </ListState>
             </ScrollView>
 
             <Modal
@@ -193,10 +166,10 @@ export default function GradesScreen() {
                                 </View>
 
                                 <TouchableOpacity
-                                    style={[GlobalStyles.button, { marginTop: Spacing[6] }]}
+                                    style={[GlobalStyles.buttonPrimary, { marginTop: Spacing[6] }]}
                                     onPress={() => setSelectedGrade(null)}
                                 >
-                                    <Text style={GlobalStyles.buttonText}>Zamknij</Text>
+                                    <Text style={GlobalStyles.buttonPrimaryText}>Zamknij</Text>
                                 </TouchableOpacity>
                             </>
                         )}
