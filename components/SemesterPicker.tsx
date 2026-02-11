@@ -1,6 +1,6 @@
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { semestersApi } from '@/services/api';
-import type { MobileSemesterDto } from '@/types';
+import type { MobileSemester } from '@/types';
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
@@ -8,7 +8,7 @@ import { Text, TouchableOpacity, View } from 'react-native';
 interface Props { onSemesterChange: (semesterId: number) => void; }
 
 export default function SemesterPicker({ onSemesterChange }: Props) {
-    const [semesters, setSemesters] = useState<MobileSemesterDto[]>([]);
+    const [semesters, setSemesters] = useState<MobileSemester[]>([]);
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [expanded, setExpanded] = useState(false);
 

@@ -5,16 +5,10 @@ import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useStudent } from '@/contexts/StudentContext';
 import { useCMSContent } from '@/hooks/useCMSContent';
 import { attendanceApi } from '@/services/api';
-import type { MobileAttendanceStatDto, MobileDailyLessonDto, MobileSubjectAttendanceDto } from '@/types';
+import type { MobileAttendanceStat, MobileDailyLesson, MobileSubjectAttendance } from '@/types';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
-import {
-    RefreshControl,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
+import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import PieChart from 'react-native-pie-chart';
 
 type TabType = 'week' | 'stats';
@@ -33,17 +27,15 @@ const getWeekDays = (baseDate: Date) => {
     return days;
 };
 
-
-
 export default function AttendanceScreen() {
     const { selectedStudent } = useStudent();
     const { getText } = useCMSContent('mobileAttendance');
     const [activeTab, setActiveTab] = useState<TabType>('week');
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [weekDays, setWeekDays] = useState(getWeekDays(new Date()));
-    const [dailyLessons, setDailyLessons] = useState<MobileDailyLessonDto[]>([]);
-    const [subjects, setSubjects] = useState<MobileSubjectAttendanceDto[]>([]);
-    const [stats, setStats] = useState<MobileAttendanceStatDto[]>([]);
+    const [dailyLessons, setDailyLessons] = useState<MobileDailyLesson[]>([]);
+    const [subjects, setSubjects] = useState<MobileSubjectAttendance[]>([]);
+    const [stats, setStats] = useState<MobileAttendanceStat[]>([]);
     const [totalLessons, setTotalLessons] = useState(0);
     const [refreshing, setRefreshing] = useState(false);
     const [loading, setLoading] = useState(true);

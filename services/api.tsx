@@ -8,10 +8,10 @@ const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
 
 import type {
-    BackendLoginResponse, ChangePasswordDto, CMSContent,
-    CreateMobileExcuseDto, MobileAnnouncementDto, MobileAttendanceDto,
-    MobileChildDto, MobileExcuseDto, MobileGradesDto,
-    MobileNegativeAttendanceDto, MobileScheduleDto, MobileSemesterDto,
+    BackendLoginResponse, ChangePassword, CMSContent,
+    CreateMobileExcuse, MobileAnnouncement, MobileAttendance,
+    MobileChild, MobileExcuse, MobileGrades,
+    MobileNegativeAttendance, MobileSchedule, MobileSemester,
     TicketReason, User, UserProfile
 } from '@/types';
 
@@ -183,39 +183,39 @@ export const authApi = {
 };
 
 export const studentsApi = {
-    async getAll(): Promise<MobileChildDto[]> {
-        return (await api<MobileChildDto[]>('GET', '/mobile/children')) ?? [];
+    async getAll(): Promise<MobileChild[]> {
+        return (await api<MobileChild[]>('GET', '/mobile/children')) ?? [];
     },
 };
 
 export const scheduleApi = {
-    async get(studentId?: number): Promise<MobileScheduleDto | null> {
+    async get(studentId?: number): Promise<MobileSchedule | null> {
         const headers = await getHeaders();
         const response = await fetch(`${API_URL}/mobile/schedule${buildQuery({ studentId })}`, { headers });
         if (response.status === 404) return null;
-        return handleResponse<MobileScheduleDto>(response);
+        return handleResponse<MobileSchedule>(response);
     },
 };
 
 export const gradesApi = {
-    async getAll(studentId?: number, semesterId?: number): Promise<MobileGradesDto> {
-        return (await api<MobileGradesDto>('GET', '/mobile/grades', { params: { studentId, semesterId } })) ?? { subjects: [], recentGrades: [] };
+    async getAll(studentId?: number, semesterId?: number): Promise<MobileGrades> {
+        return (await api<MobileGrades>('GET', '/mobile/grades', { params: { studentId, semesterId } })) ?? { subjects: [], recentGrades: [] };
     },
 };
 
 export const attendanceApi = {
-    async getAll(studentId?: number, semesterId?: number, date?: Date): Promise<MobileAttendanceDto> {
-        return (await api<MobileAttendanceDto>('GET', '/mobile/attendance', { params: { studentId, semesterId, date } })) ?? { subjects: [], recentRecords: [], dailyLessons: [], stats: [], totalLessons: 0 };
+    async getAll(studentId?: number, semesterId?: number, date?: Date): Promise<MobileAttendance> {
+        return (await api<MobileAttendance>('GET', '/mobile/attendance', { params: { studentId, semesterId, date } })) ?? { subjects: [], recentRecords: [], dailyLessons: [], stats: [], totalLessons: 0 };
     },
 
-    async getNegative(studentId?: number, semesterId?: number): Promise<MobileNegativeAttendanceDto[]> {
-        return (await api<MobileNegativeAttendanceDto[]>('GET', '/mobile/negative-attendances', { params: { studentId, semesterId } })) ?? [];
+    async getNegative(studentId?: number, semesterId?: number): Promise<MobileNegativeAttendance[]> {
+        return (await api<MobileNegativeAttendance[]>('GET', '/mobile/negative-attendances', { params: { studentId, semesterId } })) ?? [];
     },
 };
 
 export const announcementsApi = {
-    async getAll(): Promise<MobileAnnouncementDto[]> {
-        return (await api<MobileAnnouncementDto[]>('GET', '/mobile/announcements')) ?? [];
+    async getAll(): Promise<MobileAnnouncement[]> {
+        return (await api<MobileAnnouncement[]>('GET', '/mobile/announcements')) ?? [];
     },
 
     async markAsRead(id: number): Promise<void> {
@@ -224,18 +224,18 @@ export const announcementsApi = {
 };
 
 export const excusesApi = {
-    async getAll(studentId?: number, semesterId?: number): Promise<MobileExcuseDto[]> {
-        return (await api<MobileExcuseDto[]>('GET', '/mobile/excuses', { params: { studentId, semesterId } })) ?? [];
+    async getAll(studentId?: number, semesterId?: number): Promise<MobileExcuse[]> {
+        return (await api<MobileExcuse[]>('GET', '/mobile/excuses', { params: { studentId, semesterId } })) ?? [];
     },
 
-    async create(studentId: number | undefined, dto: CreateMobileExcuseDto): Promise<void> {
+    async create(studentId: number | undefined, dto: CreateMobileExcuse): Promise<void> {
         await api('POST', '/mobile/excuse', { body: dto, params: { studentId } });
     },
 };
 
 export const semestersApi = {
-    async getAll(): Promise<MobileSemesterDto[]> {
-        return (await api<MobileSemesterDto[]>('GET', '/mobile/semesters')) ?? [];
+    async getAll(): Promise<MobileSemester[]> {
+        return (await api<MobileSemester[]>('GET', '/mobile/semesters')) ?? [];
     },
 };
 
@@ -271,7 +271,7 @@ export const usersApi = {
         await api('PUT', `/user/${id}`, { body: data });
     },
 
-    async changePassword(id: number, data: ChangePasswordDto): Promise<void> {
+    async changePassword(id: number, data: ChangePassword): Promise<void> {
         await api('PATCH', `/user/${id}/change-password`, { body: data });
     },
 };

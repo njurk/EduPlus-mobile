@@ -1,11 +1,11 @@
 import { studentsApi } from '@/services/api';
-import type { MobileChildDto } from '@/types';
+import type { MobileChild } from '@/types';
 import React, { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
 
 interface StudentContextType {
-    children: MobileChildDto[];
-    selectedStudent: MobileChildDto | null;
+    children: MobileChild[];
+    selectedStudent: MobileChild | null;
     selectStudent: (id: number) => void;
     isLoading: boolean;
     hasMultipleChildren: boolean;
@@ -15,8 +15,8 @@ const StudentContext = createContext<StudentContextType | undefined>(undefined);
 
 export function StudentProvider({ children: childrenNodes }: { children: ReactNode }) {
     const { user, isParent } = useAuth();
-    const [childrenList, setChildrenList] = useState<MobileChildDto[]>([]);
-    const [selectedStudent, setSelectedStudent] = useState<MobileChildDto | null>(null);
+    const [childrenList, setChildrenList] = useState<MobileChild[]>([]);
+    const [selectedStudent, setSelectedStudent] = useState<MobileChild | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {

@@ -4,7 +4,7 @@ import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useSemesterLoader } from '@/hooks/useSemesterLoader';
 import { gradesApi } from '@/services/api';
-import type { MobileSubjectGradesDto } from '@/types';
+import type { MobileSubjectGrades } from '@/types';
 import { formatDate, formatDateTime } from '@/utils/formatters';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -29,7 +29,7 @@ interface GradeDetail {
 }
 
 export default function GradesScreen() {
-    const [subjects, setSubjects] = useState<MobileSubjectGradesDto[]>([]);
+    const [subjects, setSubjects] = useState<MobileSubjectGrades[]>([]);
     const [expandedSubject, setExpandedSubject] = useState<number | null>(null);
     const [selectedGrade, setSelectedGrade] = useState<GradeDetail | null>(null);
     const [loading, setLoading] = useState(true);

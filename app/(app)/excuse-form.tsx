@@ -3,7 +3,7 @@ import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useStudent } from '@/contexts/StudentContext';
 import { excusesApi } from '@/services/api';
-import type { MobileNegativeAttendanceDto } from '@/types';
+import type { MobileNegativeAttendance } from '@/types';
 import { formatDate } from '@/utils/formatters';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
@@ -25,7 +25,7 @@ export default function ExcuseFormScreen() {
     const [reason, setReason] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
-    const selectedItems: MobileNegativeAttendanceDto[] = items ? JSON.parse(items) : [];
+    const selectedItems: MobileNegativeAttendance[] = items ? JSON.parse(items) : [];
 
     const handleSubmit = async () => {
         if (!reason.trim()) {

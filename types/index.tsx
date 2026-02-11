@@ -17,7 +17,7 @@ export interface BackendLoginResponse {
 
 export type LoginCredentials = { email: string; password: string };
 
-export interface MobileLessonDto {
+export interface MobileLesson {
     dayOfWeek: number;
     orderNumber: number;
     startTime: string;
@@ -27,15 +27,15 @@ export interface MobileLessonDto {
     classroomName: string;
 }
 
-export interface MobileScheduleDto {
+export interface MobileSchedule {
     classId: number;
     className: string;
     semesterId: number;
     semesterName: string;
-    lessons: MobileLessonDto[];
+    lessons: MobileLesson[];
 }
 
-export interface MobileGradeDto {
+export interface MobileGrade {
     id: number;
     value: string;
     categoryName: string;
@@ -46,14 +46,14 @@ export interface MobileGradeDto {
     createdAt: string;
 }
 
-export interface MobileSubjectGradesDto {
+export interface MobileSubjectGrades {
     subjectId: number;
     subjectName: string;
     average: number | null;
-    grades: MobileGradeDto[];
+    grades: MobileGrade[];
 }
 
-export interface MobileRecentGradeDto {
+export interface MobileRecentGrade {
     id: number;
     subjectName: string;
     value: string;
@@ -66,12 +66,12 @@ export interface MobileRecentGradeDto {
     createdAt: string;
 }
 
-export interface MobileGradesDto {
-    subjects: MobileSubjectGradesDto[];
-    recentGrades: MobileRecentGradeDto[];
+export interface MobileGrades {
+    subjects: MobileSubjectGrades[];
+    recentGrades: MobileRecentGrade[];
 }
 
-export interface MobileSubjectAttendanceDto {
+export interface MobileSubjectAttendance {
     subjectName: string;
     totalLessons: number;
     present: number;
@@ -81,14 +81,14 @@ export interface MobileSubjectAttendanceDto {
     attendancePercentage: number;
 }
 
-export interface MobileAttendanceRecordDto {
+export interface MobileAttendanceRecord {
     subjectName: string;
     date: string;
     type: string;
     typeColorHex: string;
 }
 
-export interface MobileDailyLessonDto {
+export interface MobileDailyLesson {
     lessonOrder: number;
     startTime: string;
     endTime: string;
@@ -97,7 +97,7 @@ export interface MobileDailyLessonDto {
     attendanceTypeColorHex: string | null;
 }
 
-export interface MobileAttendanceStatDto {
+export interface MobileAttendanceStat {
     shortCode: string;
     name: string;
     colorHex: string;
@@ -105,15 +105,15 @@ export interface MobileAttendanceStatDto {
     isNegative: boolean;
 }
 
-export interface MobileAttendanceDto {
-    subjects: MobileSubjectAttendanceDto[];
-    recentRecords: MobileAttendanceRecordDto[];
-    dailyLessons: MobileDailyLessonDto[];
-    stats: MobileAttendanceStatDto[];
+export interface MobileAttendance {
+    subjects: MobileSubjectAttendance[];
+    recentRecords: MobileAttendanceRecord[];
+    dailyLessons: MobileDailyLesson[];
+    stats: MobileAttendanceStat[];
     totalLessons: number;
 }
 
-export interface MobileAnnouncementDto {
+export interface MobileAnnouncement {
     id: number;
     title: string;
     content: string;
@@ -123,7 +123,7 @@ export interface MobileAnnouncementDto {
     isRead: boolean;
 }
 
-export interface MobileNegativeAttendanceDto {
+export interface MobileNegativeAttendance {
     id: number;
     date: string;
     subjectName: string;
@@ -132,12 +132,12 @@ export interface MobileNegativeAttendanceDto {
     attendanceTypeColorHex: string;
 }
 
-export interface CreateMobileExcuseDto {
+export interface CreateMobileExcuse {
     attendanceIds: number[];
     reason: string;
 }
 
-export interface MobileSemesterDto {
+export interface MobileSemester {
     id: number;
     name: string;
     startDate: string;
@@ -145,13 +145,13 @@ export interface MobileSemesterDto {
     isCurrent: boolean;
 }
 
-export interface MobileChildDto {
+export interface MobileChild {
     id: number;
     name: string;
     className: string | null;
 }
 
-export interface MobileExcuseAttendanceDto {
+export interface MobileExcuseAttendance {
     id: number;
     subjectName: string;
     date: string;
@@ -159,13 +159,13 @@ export interface MobileExcuseAttendanceDto {
     attendanceType: string;
 }
 
-export interface MobileExcuseDto {
+export interface MobileExcuse {
     id: number;
     reason: string;
     status: string;
     statusColorHex: string;
     createdAt: string;
-    attendances: MobileExcuseAttendanceDto[];
+    attendances: MobileExcuseAttendance[];
 }
 
 export interface TicketReason {
@@ -189,7 +189,7 @@ export interface UserProfile {
     postalCode: string | null;
 }
 
-export interface ChangePasswordDto {
+export interface ChangePassword {
     currentPassword: string;
     newPassword: string;
 }

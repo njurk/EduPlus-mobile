@@ -1,7 +1,7 @@
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, Spacing } from '@/constants/theme';
 import { announcementsApi } from '@/services/api';
-import type { MobileAnnouncementDto } from '@/types';
+import type { MobileAnnouncement } from '@/types';
 import { formatDate } from '@/utils/formatters';
 import { useFocusEffect } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -16,7 +16,7 @@ import {
 
 export default function AnnouncementsScreen() {
     const { openId } = useLocalSearchParams<{ openId?: string }>();
-    const [announcements, setAnnouncements] = useState<MobileAnnouncementDto[]>([]);
+    const [announcements, setAnnouncements] = useState<MobileAnnouncement[]>([]);
     const [refreshing, setRefreshing] = useState(false);
     const [loading, setLoading] = useState(true);
 

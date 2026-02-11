@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useStudent } from '@/contexts/StudentContext';
 import { useCMSContent } from '@/hooks/useCMSContent';
 import { announcementsApi, attendanceApi, gradesApi, scheduleApi } from '@/services/api';
-import type { MobileAnnouncementDto, MobileAttendanceRecordDto, MobileRecentGradeDto, MobileScheduleDto } from '@/types';
+import type { MobileAnnouncement, MobileAttendanceRecord, MobileRecentGrade, MobileSchedule } from '@/types';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import React, { useCallback, useState } from 'react';
@@ -23,10 +23,10 @@ export default function DashboardScreen() {
     const { user } = useAuth();
     const { selectedStudent, hasMultipleChildren } = useStudent();
     const { getText } = useCMSContent('mobileDashboard');
-    const [recentGrades, setRecentGrades] = useState<MobileRecentGradeDto[]>([]);
-    const [announcements, setAnnouncements] = useState<MobileAnnouncementDto[]>([]);
-    const [todayLessons, setTodayLessons] = useState<MobileScheduleDto['lessons']>([]);
-    const [recentAttendance, setRecentAttendance] = useState<MobileAttendanceRecordDto[]>([]);
+    const [recentGrades, setRecentGrades] = useState<MobileRecentGrade[]>([]);
+    const [announcements, setAnnouncements] = useState<MobileAnnouncement[]>([]);
+    const [todayLessons, setTodayLessons] = useState<MobileSchedule['lessons']>([]);
+    const [recentAttendance, setRecentAttendance] = useState<MobileAttendanceRecord[]>([]);
     const [refreshing, setRefreshing] = useState(false);
     const [className, setClassName] = useState<string | null>(null);
 

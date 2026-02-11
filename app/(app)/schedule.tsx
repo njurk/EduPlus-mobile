@@ -3,7 +3,7 @@ import { DAY_NAMES_SHORT } from '@/constants/locale';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useStudent } from '@/contexts/StudentContext';
 import { scheduleApi } from '@/services/api';
-import type { MobileScheduleDto } from '@/types';
+import type { MobileSchedule } from '@/types';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import {
@@ -17,7 +17,7 @@ import {
 
 export default function ScheduleScreen() {
     const { selectedStudent } = useStudent();
-    const [schedule, setSchedule] = useState<MobileScheduleDto | null>(null);
+    const [schedule, setSchedule] = useState<MobileSchedule | null>(null);
     const [selectedDay, setSelectedDay] = useState(Math.min(new Date().getDay() - 1, 4));
     const [refreshing, setRefreshing] = useState(false);
     const [loading, setLoading] = useState(true);

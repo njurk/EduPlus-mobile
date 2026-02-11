@@ -1,7 +1,7 @@
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { announcementsApi } from '@/services/api';
-import type { MobileAnnouncementDto } from '@/types';
+import type { MobileAnnouncement } from '@/types';
 import { formatDateTime } from '@/utils/formatters';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -16,7 +16,7 @@ import RenderHtml from 'react-native-render-html';
 
 export default function AnnouncementDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
-    const [announcement, setAnnouncement] = useState<MobileAnnouncementDto | null>(null);
+    const [announcement, setAnnouncement] = useState<MobileAnnouncement | null>(null);
     const [loading, setLoading] = useState(true);
     const { width } = useWindowDimensions();
 
