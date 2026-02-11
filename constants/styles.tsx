@@ -154,15 +154,15 @@ export const GlobalStyles = StyleSheet.create({
     },
 
     badge: {
-        backgroundColor: Colors.primary.light,
-        borderRadius: BorderRadius.sm,
-        paddingHorizontal: Spacing[2],
-        paddingVertical: Spacing[0.5],
+        backgroundColor: Colors.primary.DEFAULT,
+        borderRadius: 2,
+        paddingHorizontal: Spacing[1.5],
+        paddingVertical: 1,
     },
     badgeText: {
-        color: Colors.primary.DEFAULT,
-        fontSize: FontSizes.xs,
-        fontWeight: '600',
+        color: Colors.white,
+        fontSize: 14,
+        fontWeight: '700',
         textTransform: 'uppercase',
     },
 

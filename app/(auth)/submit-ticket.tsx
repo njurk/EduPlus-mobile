@@ -20,7 +20,7 @@ import {
 } from 'react-native';
 
 export default function SubmitTicketScreen() {
-    const { getText } = useCMSContent('submitTicket');
+    const { getText } = useCMSContent('mobileSubmitTicket');
     const [email, setEmail] = useState('');
     const [description, setDescription] = useState('');
     const [reasons, setReasons] = useState<TicketReason[]>([]);

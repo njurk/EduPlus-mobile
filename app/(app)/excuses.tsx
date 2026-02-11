@@ -95,9 +95,9 @@ export default function ExcusesScreen() {
                         </TouchableOpacity>
 
                         {expandedSection === 'unexcused' && (
-                            <View style={{ marginTop: Spacing[4] }}>
+                            <View style={{ marginTop: Spacing[3] }}>
                                 {attendances.length === 0 ? (
-                                    <View style={[GlobalStyles.card, { alignItems: 'center' }]}>
+                                    <View style={[GlobalStyles.cardSmall, { alignItems: 'center' }]}>
                                         <Text style={GlobalStyles.caption}>Brak</Text>
                                     </View>
                                 ) : attendances.map(attendance => {
@@ -105,7 +105,7 @@ export default function ExcusesScreen() {
                                     return (
                                         <TouchableOpacity
                                             key={attendance.id}
-                                            style={[GlobalStyles.card, { flexDirection: 'row', alignItems: 'center', borderWidth: 2, borderColor: isSelected ? Colors.primary.DEFAULT : 'transparent' }]}
+                                            style={[GlobalStyles.cardSmall, { flexDirection: 'row', alignItems: 'center', borderWidth: 2, borderColor: isSelected ? Colors.primary.DEFAULT : 'transparent' }]}
                                             onPress={() => toggleSelection(attendance.id)}
                                         >
                                             <View style={{ width: 24, height: 24, borderRadius: 4, borderWidth: 2, borderColor: isSelected ? Colors.primary.DEFAULT : Colors.neutral[400], backgroundColor: isSelected ? Colors.primary.DEFAULT : 'transparent', justifyContent: 'center', alignItems: 'center', marginRight: Spacing[3] }}>
@@ -135,15 +135,15 @@ export default function ExcusesScreen() {
                         </TouchableOpacity>
 
                         {expandedSection === 'excused' && (
-                            <View style={{ marginTop: Spacing[1] }}>
+                            <View>
                                 {excuses.length === 0 ? (
-                                    <View style={[GlobalStyles.card, { alignItems: 'center' }]}>
+                                    <View style={[GlobalStyles.cardSmall, { alignItems: 'center' }]}>
                                         <Text style={GlobalStyles.caption}>Brak</Text>
                                     </View>
                                 ) : excuses.map(excuse => (
                                     <TouchableOpacity
                                         key={excuse.id}
-                                        style={GlobalStyles.card}
+                                        style={GlobalStyles.cardSmall}
                                         onPress={() => setExpandedExcuseId(expandedExcuseId === excuse.id ? null : excuse.id)}
                                     >
                                         <View style={GlobalStyles.rowBetween}>
