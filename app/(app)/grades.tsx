@@ -6,7 +6,7 @@ import { useSemesterLoader } from '@/hooks/useSemesterLoader';
 import { gradesApi } from '@/services/api';
 import type { MobileSubjectGrades } from '@/types';
 import { formatDate, formatDateTime } from '@/utils/formatters';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
     Modal,
@@ -21,12 +21,15 @@ interface GradeDetail {
     value: string;
     categoryName: string;
     categoryColorHex: string;
+    categorySlug: string | null;
     teacherName: string;
     comment: string | null;
     weight: number;
     createdAt: string;
     subjectName: string;
 }
+
+const GRADES_SLUGS = ['midyear', 'final'];
 
 export default function GradesScreen() {
     const [subjects, setSubjects] = useState<MobileSubjectGrades[]>([]);
@@ -59,6 +62,7 @@ export default function GradesScreen() {
                     break;
                 }
             }
+            router.setParams({ openGradeId: '' });
         }
     }, [openGradeId, subjects]);
 
@@ -89,32 +93,41 @@ export default function GradesScreen() {
                                 </View>
                             </View>
 
-                            {expandedSubject === subject.subjectId && (
-                                <View style={{ marginTop: Spacing[3], borderTopWidth: 1, borderTopColor: Colors.neutral[100], paddingTop: Spacing[3] }}>
-                                    {subject.grades.map((grade, index) => (
-                                        <TouchableOpacity
-                                            key={index}
-                                            style={[GlobalStyles.row, GlobalStyles.divider, { alignItems: 'flex-start' }]}
-                                            onPress={(e) => {
-                                                e.stopPropagation();
-                                                setSelectedGrade({ ...grade, subjectName: subject.subjectName });
-                                            }}
-                                            activeOpacity={0.7}
-                                        >
-                                            <View style={[GlobalStyles.gradeBox, { backgroundColor: grade.categoryColorHex || Colors.neutral[300] }]}>
-                                                <Text style={GlobalStyles.gradeValue}>{grade.value}</Text>
-                                            </View>
-                                            <View style={{ flex: 1, marginLeft: Spacing[3] }}>
-                                                <Text style={GlobalStyles.title}>{grade.categoryName}</Text>
-                                                <Text style={GlobalStyles.caption}>{grade.teacherName}</Text>
-                                            </View>
-                                            <Text style={GlobalStyles.caption}>
-                                                {formatDate(grade.createdAt)}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            )}
+                            {expandedSubject === subject.subjectId && (() => {
+                                const formal = subject.grades.filter(g => GRADES_SLUGS.includes(g.categorySlug ?? ''));
+                                const regular = subject.grades.filter(g => !GRADES_SLUGS.includes(g.categorySlug ?? ''));
+                                const renderGrade = (grade: typeof subject.grades[0], index: number, isFormal: boolean) => (
+                                    <TouchableOpacity
+                                        key={`${isFormal ? 'f' : 'r'}-${index}`}
+                                        style={[GlobalStyles.row, GlobalStyles.divider, { alignItems: 'flex-start' }]}
+                                        onPress={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedGrade({ ...grade, subjectName: subject.subjectName });
+                                        }}
+                                        activeOpacity={0.7}
+                                    >
+                                        <View style={[GlobalStyles.gradeBox, { backgroundColor: grade.categoryColorHex || Colors.neutral[300] }]}>
+                                            <Text style={GlobalStyles.gradeValue}>{grade.value}</Text>
+                                        </View>
+                                        <View style={{ flex: 1, marginLeft: Spacing[3] }}>
+                                            <Text style={[GlobalStyles.title, isFormal && { fontWeight: '700' }]}>{grade.categoryName}</Text>
+                                            <Text style={GlobalStyles.caption}>{grade.teacherName}</Text>
+                                        </View>
+                                        <Text style={GlobalStyles.caption}>
+                                            {formatDate(grade.createdAt)}
+                                        </Text>
+                                    </TouchableOpacity>
+                                );
+                                return (
+                                    <View style={{ marginTop: Spacing[3], borderTopWidth: 1, borderTopColor: Colors.neutral[100], paddingTop: Spacing[3] }}>
+                                        {formal.map((g, i) => renderGrade(g, i, true))}
+                                        {formal.length > 0 && regular.length > 0 && (
+                                            <View style={{ borderBottomWidth: 1, borderBottomColor: Colors.neutral[200], marginVertical: Spacing[2] }} />
+                                        )}
+                                        {regular.map((g, i) => renderGrade(g, i, false))}
+                                    </View>
+                                );
+                            })()}
                         </TouchableOpacity>
                     ))}
                 </ListState>

@@ -1,4 +1,4 @@
-import { authApi, setOnUnauthorized } from '@/services/api';
+import { authApi, storeUser, setOnUnauthorized } from '@/services/api';
 import type { User } from '@/types';
 import React, { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 
@@ -9,6 +9,7 @@ interface AuthContextType {
     isStudent: boolean;
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
+    updateUser: (updates: Partial<User>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -50,11 +51,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
     }, []);
 
+    const updateUser = useCallback(async (updates: Partial<User>) => {
+        if (!user) return;
+        const updated = { ...user, ...updates };
+        await storeUser(updated);
+        setUser(updated);
+    }, [user]);
+
     const isParent = user?.roleLevel === 3;
     const isStudent = user?.roleLevel === 4;
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, isParent, isStudent, login, logout }}>
+        <AuthContext.Provider value={{ user, isLoading, isParent, isStudent, login, logout, updateUser }}>
             {children}
         </AuthContext.Provider>
     );
@@ -67,3 +75,4 @@ export function useAuth(): AuthContextType {
     }
     return context;
 }
+

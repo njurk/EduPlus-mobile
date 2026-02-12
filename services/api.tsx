@@ -23,9 +23,6 @@ async function getStoredToken(): Promise<string | null> {
 }
 
 async function storeToken(token: string): Promise<void> {
-    if (typeof token !== 'string' || !token) {
-        throw new Error('Token jest nieprawidłowy');
-    }
     if (Platform.OS === 'web') {
         localStorage.setItem(TOKEN_KEY, token);
         return;
@@ -41,12 +38,9 @@ async function removeToken(): Promise<void> {
     await SecureStore.deleteItemAsync(TOKEN_KEY);
 }
 
-async function storeUser(user: User): Promise<void> {
+export async function storeUser(user: User): Promise<void> {
     if (!user) return;
     const json = JSON.stringify(user);
-    if (typeof json !== 'string' || !json) {
-        throw new Error('Nie udało się zapisać użytkownika');
-    }
     if (Platform.OS === 'web') {
         localStorage.setItem(USER_KEY, json);
         return;
@@ -98,7 +92,14 @@ async function handleResponse<T>(response: Response): Promise<T | null> {
     }
     if (!response.ok) {
         const text = await response.text();
-        throw new Error(text || `HTTP ${response.status}`);
+        let message = `HTTP ${response.status}`;
+        try {
+            const json = JSON.parse(text);
+            message = json.error || json.message || json.title || message;
+        } catch {
+            message = text.replace(/^"|"$/g, '') || message;
+        }
+        throw new Error(message);
     }
     const text = await response.text();
     return text ? JSON.parse(text) : null;
@@ -153,7 +154,6 @@ export const authApi = {
         const text = await response.text();
         const data: BackendLoginResponse | null = text ? JSON.parse(text) : null;
         if (!data) throw new Error('Nieprawidłowa odpowiedź serwera');
-        const tokenString = typeof data.token === 'string' ? data.token : String(data.token);
         const user: User = {
             id: data.userId,
             email: data.userEmail,
@@ -161,9 +161,9 @@ export const authApi = {
             roleLevel: data.maxRoleLevel,
             studentName: data.studentName,
         };
-        await storeToken(tokenString);
+        await storeToken(data.token);
         await storeUser(user);
-        return { token: tokenString, user };
+        return { token: data.token, user };
     },
 
     async logout(): Promise<void> {
@@ -178,11 +178,19 @@ export const authApi = {
         await publicApi('/passwordreset/request', { email });
     },
 
+    async validateCode(token: string): Promise<void> {
+        await publicApi('/passwordreset/validate', { token });
+    },
+
+    async resetPassword(token: string, newPassword: string): Promise<void> {
+        await publicApi('/passwordreset/reset', { token, newPassword });
+    },
+
     getStoredToken,
     getStoredUser,
 };
 
-export const studentsApi = {
+export const childrenApi = {
     async getAll(): Promise<MobileChild[]> {
         return (await api<MobileChild[]>('GET', '/mobile/children')) ?? [];
     },
@@ -190,10 +198,7 @@ export const studentsApi = {
 
 export const scheduleApi = {
     async get(studentId?: number): Promise<MobileSchedule | null> {
-        const headers = await getHeaders();
-        const response = await fetch(`${API_URL}/mobile/schedule${buildQuery({ studentId })}`, { headers });
-        if (response.status === 404) return null;
-        return handleResponse<MobileSchedule>(response);
+        return await api<MobileSchedule>('GET', '/mobile/schedule', { params: { studentId } });
     },
 };
 

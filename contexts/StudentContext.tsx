@@ -1,4 +1,4 @@
-import { studentsApi } from '@/services/api';
+import { childrenApi } from '@/services/api';
 import type { MobileChild } from '@/types';
 import React, { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
@@ -21,7 +21,7 @@ export function StudentProvider({ children: childrenNodes }: { children: ReactNo
 
     useEffect(() => {
         if (user && isParent) {
-            studentsApi.getAll().then(data => {
+            childrenApi.getAll().then(data => {
                 setChildrenList(data);
                 if (data.length > 0) setSelectedStudent(data[0]);
             }).catch(() => { }).finally(() => setIsLoading(false));

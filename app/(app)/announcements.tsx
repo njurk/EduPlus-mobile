@@ -1,5 +1,6 @@
 import { GlobalStyles } from '@/constants/styles';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
+import { useRefresh } from '@/hooks/useRefresh';
 import { announcementsApi } from '@/services/api';
 import type { MobileAnnouncement } from '@/types';
 import { formatDate } from '@/utils/formatters';
@@ -7,7 +8,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-    RefreshControl,
     ScrollView,
     Text,
     TouchableOpacity,
@@ -17,7 +17,7 @@ import {
 export default function AnnouncementsScreen() {
     const { openId } = useLocalSearchParams<{ openId?: string }>();
     const [announcements, setAnnouncements] = useState<MobileAnnouncement[]>([]);
-    const [refreshing, setRefreshing] = useState(false);
+
     const [loading, setLoading] = useState(true);
 
     const loadData = async () => {
@@ -45,17 +45,13 @@ export default function AnnouncementsScreen() {
         }
     }, [openId, announcements]);
 
-    const onRefresh = async () => {
-        setRefreshing(true);
-        await loadData();
-        setRefreshing(false);
-    };
+    const { refreshControl } = useRefresh(loadData);
 
     return (
         <View style={GlobalStyles.screen}>
             <ScrollView
                 contentContainerStyle={GlobalStyles.scrollContent}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary.DEFAULT]} />}
+                refreshControl={refreshControl}
             >
                 {announcements.length === 0 && !loading ? (
                     <View style={GlobalStyles.emptyContainer}>

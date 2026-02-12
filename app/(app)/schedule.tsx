@@ -4,10 +4,10 @@ import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useStudent } from '@/contexts/StudentContext';
 import { scheduleApi } from '@/services/api';
 import type { MobileSchedule } from '@/types';
+import { useRefresh } from '@/hooks/useRefresh';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import {
-    RefreshControl,
     ScrollView,
     Text,
     TouchableOpacity,
@@ -19,7 +19,6 @@ export default function ScheduleScreen() {
     const { selectedStudent } = useStudent();
     const [schedule, setSchedule] = useState<MobileSchedule | null>(null);
     const [selectedDay, setSelectedDay] = useState(Math.min(new Date().getDay() - 1, 4));
-    const [refreshing, setRefreshing] = useState(false);
     const [loading, setLoading] = useState(true);
 
     const loadData = async () => {
@@ -39,11 +38,7 @@ export default function ScheduleScreen() {
         }, [selectedStudent])
     );
 
-    const onRefresh = async () => {
-        setRefreshing(true);
-        await loadData();
-        setRefreshing(false);
-    };
+    const { refreshControl } = useRefresh(loadData);
 
     const todaysLessons = schedule?.lessons.filter(l => l.dayOfWeek === selectedDay + 1) || [];
 
@@ -66,7 +61,7 @@ export default function ScheduleScreen() {
             <ScrollView
                 style={{ flex: 1 }}
                 contentContainerStyle={GlobalStyles.scrollContent}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary.DEFAULT]} />}
+                refreshControl={refreshControl}
             >
                 {(!schedule && !loading) || todaysLessons.length === 0 ? (
                     <View style={GlobalStyles.emptyContainer}>

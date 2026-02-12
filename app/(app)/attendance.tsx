@@ -6,9 +6,10 @@ import { useStudent } from '@/contexts/StudentContext';
 import { useCMSContent } from '@/hooks/useCMSContent';
 import { attendanceApi } from '@/services/api';
 import type { MobileAttendanceStat, MobileDailyLesson, MobileSubjectAttendance } from '@/types';
+import { useRefresh } from '@/hooks/useRefresh';
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
-import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useRef, useState } from 'react';
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import PieChart from 'react-native-pie-chart';
 
 type TabType = 'week' | 'stats';
@@ -37,8 +38,8 @@ export default function AttendanceScreen() {
     const [subjects, setSubjects] = useState<MobileSubjectAttendance[]>([]);
     const [stats, setStats] = useState<MobileAttendanceStat[]>([]);
     const [totalLessons, setTotalLessons] = useState(0);
-    const [refreshing, setRefreshing] = useState(false);
     const [loading, setLoading] = useState(true);
+    const selectedDateRef = useRef(selectedDate);
 
     const loadData = async (date: Date) => {
         try {
@@ -52,23 +53,25 @@ export default function AttendanceScreen() {
         }
     };
 
+    const refreshLoader = useCallback(async () => {
+        await loadData(selectedDateRef.current);
+    }, []);
+
     useFocusEffect(
         useCallback(() => {
             const today = new Date();
             setSelectedDate(today);
+            selectedDateRef.current = today;
             setWeekDays(getWeekDays(today));
             loadData(today);
         }, [selectedStudent])
     );
 
-    const onRefresh = async () => {
-        setRefreshing(true);
-        await loadData(selectedDate);
-        setRefreshing(false);
-    };
+    const { refreshControl } = useRefresh(refreshLoader);
 
     const onDateSelect = async (date: Date) => {
         setSelectedDate(date);
+        selectedDateRef.current = date;
         setLoading(true);
         await loadData(date);
     };
@@ -138,7 +141,9 @@ export default function AttendanceScreen() {
             </View>
 
             {loading ? (
-                <Text style={GlobalStyles.caption}>Ładowanie...</Text>
+                <View style={[GlobalStyles.emptyContainer, { paddingTop: Spacing[8] }]}>
+                    <ActivityIndicator size="large" color={Colors.primary.DEFAULT} />
+                </View>
             ) : dailyLessons.length === 0 ? (
                 <View style={GlobalStyles.emptyContainer}>
                     <Text style={GlobalStyles.emptyText}>Brak lekcji</Text>
@@ -207,7 +212,7 @@ export default function AttendanceScreen() {
         <ScrollView
             style={GlobalStyles.screen}
             contentContainerStyle={GlobalStyles.scrollContent}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary.DEFAULT]} />}
+            refreshControl={refreshControl}
         >
             <View style={{ flexDirection: 'row', marginBottom: Spacing[4], borderBottomWidth: 1, borderBottomColor: Colors.neutral[100] }}>
                 {[

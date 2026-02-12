@@ -1,3 +1,4 @@
+import FullScreenLoader from '@/components/FullScreenLoader';
 import MessageBanner from '@/components/MessageBanner';
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
@@ -20,7 +21,7 @@ import {
 } from 'react-native';
 
 export default function SettingsScreen() {
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -82,6 +83,7 @@ export default function SettingsScreen() {
                 city: profile.city,
                 postalCode: profile.postalCode,
             });
+            await updateUser({ name: `${profile.firstName} ${profile.lastName}` });
             setProfileMessage({ type: 'success', text: 'Dane zostały zaktualizowane' });
         } catch (error: any) {
             setProfileMessage({ type: 'error', text: error.message || 'Nie udało się zapisać danych' });
@@ -119,11 +121,7 @@ export default function SettingsScreen() {
     const hasPasswordInput = currentPassword.length > 0 || newPassword.length > 0 || confirmPassword.length > 0;
 
     if (loading) {
-        return (
-            <View style={[GlobalStyles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
-                <ActivityIndicator size="large" color={Colors.primary.DEFAULT} />
-            </View>
-        );
+        return <FullScreenLoader />;
     }
 
     return (

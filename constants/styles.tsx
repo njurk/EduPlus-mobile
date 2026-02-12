@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { BorderRadius, Colors, FontSizes, Shadows, Spacing } from './theme';
+import { BorderRadius, Colors, FontSizes, Spacing } from './theme';
 
 export const GlobalStyles = StyleSheet.create({
     screen: {
@@ -16,14 +16,12 @@ export const GlobalStyles = StyleSheet.create({
         borderRadius: BorderRadius.sm,
         padding: Spacing[4],
         marginBottom: Spacing[4],
-        ...Shadows.sm,
     },
     cardSmall: {
         backgroundColor: Colors.light.card,
         borderRadius: BorderRadius.sm,
         padding: Spacing[3],
         marginBottom: Spacing[3],
-        ...Shadows.sm,
     },
     cardTitle: {
         fontSize: FontSizes.lg,
@@ -222,7 +220,6 @@ export const GlobalStyles = StyleSheet.create({
         padding: Spacing[3],
         marginBottom: Spacing[2],
         flexDirection: 'row',
-        ...Shadows.sm,
     },
     lessonTime: {
         width: 56,
@@ -291,7 +288,6 @@ export const GlobalStyles = StyleSheet.create({
         padding: Spacing[5],
         width: '100%',
         maxWidth: 400,
-        ...Shadows.md,
     },
     headerMedium: {
         fontSize: FontSizes.xl,

@@ -40,6 +40,7 @@ export interface MobileGrade {
     value: string;
     categoryName: string;
     categoryColorHex: string;
+    categorySlug: string | null;
     teacherName: string;
     comment: string | null;
     weight: number;

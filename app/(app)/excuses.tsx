@@ -138,7 +138,7 @@ export default function ExcusesScreen() {
                                             <View style={{ marginTop: Spacing[2], paddingTop: Spacing[2], borderTopWidth: 1, borderTopColor: Colors.neutral[200] }}>
                                                 <Text style={{ fontSize: FontSizes.sm, fontWeight: '600', color: Colors.neutral[600], marginBottom: Spacing[1] }}>Nieobecności:</Text>
                                                 {excuse.attendances.map(att => (
-                                                    <Text key={att.id} style={{ fontSize: FontSizes.sm, color: Colors.neutral[600] }}>• {att.subjectName} ({att.date}, lekcja {att.lessonHour})</Text>
+                                                    <Text key={att.id} style={{ fontSize: FontSizes.sm, color: Colors.neutral[600] }}>- {att.subjectName} ({att.date}, lekcja {att.lessonHour})</Text>
                                                 ))}
                                             </View>
                                         )}

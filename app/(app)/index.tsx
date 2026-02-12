@@ -8,11 +8,11 @@ import { useStudent } from '@/contexts/StudentContext';
 import { useCMSContent } from '@/hooks/useCMSContent';
 import { announcementsApi, attendanceApi, gradesApi, scheduleApi } from '@/services/api';
 import type { MobileAnnouncement, MobileAttendanceRecord, MobileRecentGrade, MobileSchedule } from '@/types';
+import { useRefresh } from '@/hooks/useRefresh';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
-    RefreshControl,
     ScrollView,
     Text,
     TouchableOpacity,
@@ -27,7 +27,7 @@ export default function DashboardScreen() {
     const [announcements, setAnnouncements] = useState<MobileAnnouncement[]>([]);
     const [todayLessons, setTodayLessons] = useState<MobileSchedule['lessons']>([]);
     const [recentAttendance, setRecentAttendance] = useState<MobileAttendanceRecord[]>([]);
-    const [refreshing, setRefreshing] = useState(false);
+
     const [className, setClassName] = useState<string | null>(null);
 
     const loadData = async () => {
@@ -61,17 +61,13 @@ export default function DashboardScreen() {
         }, [selectedStudent])
     );
 
-    const onRefresh = async () => {
-        setRefreshing(true);
-        await loadData();
-        setRefreshing(false);
-    };
+    const { refreshControl } = useRefresh(loadData);
 
     return (
         <ScrollView
             style={GlobalStyles.screen}
             contentContainerStyle={GlobalStyles.scrollContent}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Colors.primary.DEFAULT]} />}
+            refreshControl={refreshControl}
         >
             <View style={{ marginBottom: Spacing[6] }}>
                 <Text style={GlobalStyles.headerLarge}>{getText('greeting').replace('{name}', user?.name || '')}</Text>
@@ -153,17 +149,22 @@ export default function DashboardScreen() {
                     announcements.map((announcement) => (
                         <TouchableOpacity
                             key={announcement.id}
-                            style={[GlobalStyles.row, GlobalStyles.divider, { gap: Spacing[2] }]}
+                            style={[GlobalStyles.rowBetween, GlobalStyles.divider]}
                             onPress={() => router.push({ pathname: '/(app)/announcements', params: { openId: announcement.id } })}
                             activeOpacity={0.7}
                         >
-                            {!announcement.isRead && (
-                                <View style={GlobalStyles.badge}>
-                                    <Text style={GlobalStyles.badgeText}>nowe</Text>
-                                </View>
-                            )}
-                            <Text style={[GlobalStyles.subtitle, { flex: 1 }]} numberOfLines={1} ellipsizeMode="tail">
-                                {announcement.title}
+                            <View style={[GlobalStyles.row, { gap: Spacing[2], flex: 1 }]}>
+                                {!announcement.isRead && (
+                                    <View style={GlobalStyles.badge}>
+                                        <Text style={GlobalStyles.badgeText}>nowe</Text>
+                                    </View>
+                                )}
+                                <Text style={[GlobalStyles.subtitle, { flex: 1 }]} numberOfLines={1} ellipsizeMode="tail">
+                                    {announcement.title}
+                                </Text>
+                            </View>
+                            <Text style={{ fontSize: FontSizes.xs, color: Colors.neutral[400] }}>
+                                {new Date(announcement.createdAt).toLocaleDateString('pl-PL')}
                             </Text>
                         </TouchableOpacity>
                     ))

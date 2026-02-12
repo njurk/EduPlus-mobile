@@ -1,5 +1,5 @@
 import { GlobalStyles } from '@/constants/styles';
-import { Colors, FontSizes, Shadows, Spacing } from '@/constants/theme';
+import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCMSContent } from '@/hooks/useCMSContent';
 import { BASE_URL } from '@/services/api';
@@ -70,7 +70,7 @@ export default function LoginScreen() {
                     <Text style={GlobalStyles.subtitle}>{getText('subtitle')}</Text>
                 </View>
 
-                <View style={[GlobalStyles.card, { ...Shadows.md, padding: Spacing[6] }]}>
+                <View style={[GlobalStyles.card, { padding: Spacing[6] }]}>
                     <View style={GlobalStyles.inputGroup}>
                         <Text style={GlobalStyles.label}>Email</Text>
                         <TextInput

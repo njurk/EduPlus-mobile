@@ -1,3 +1,4 @@
+import FullScreenLoader from '@/components/FullScreenLoader';
 import { GlobalStyles } from '@/constants/styles';
 import { Colors, FontSizes, Spacing } from '@/constants/theme';
 import { announcementsApi } from '@/services/api';
@@ -6,7 +7,6 @@ import { formatDateTime } from '@/utils/formatters';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
     ScrollView,
     Text,
     useWindowDimensions,
@@ -52,11 +52,7 @@ export default function AnnouncementDetailScreen() {
     };
 
     if (loading) {
-        return (
-            <View style={[GlobalStyles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
-                <ActivityIndicator size="large" color={Colors.primary.DEFAULT} />
-            </View>
-        );
+        return <FullScreenLoader />;
     }
 
     if (!announcement) return null;
