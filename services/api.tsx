@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-export const BASE_URL = 'http://192.168.88.89:5107';
+export const BASE_URL = 'https://localhost:7252';
 export const API_URL = `${BASE_URL}/api`;
 
 const TOKEN_KEY = 'auth_token';
