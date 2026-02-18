@@ -9,7 +9,7 @@ interface Props {
 
 export default function StatusBadge({ label, color }: Props) {
     return (
-        <View style={{ backgroundColor: color, paddingHorizontal: Spacing[2], paddingVertical: Spacing[1], borderRadius: 4 }}>
+        <View style={{ backgroundColor: color, paddingHorizontal: Spacing[2], paddingVertical: Spacing[1], borderRadius: 6 }}>
             <Text style={{ color: '#fff', fontSize: FontSizes.sm, fontWeight: '600' }}>{label}</Text>
         </View>
     );

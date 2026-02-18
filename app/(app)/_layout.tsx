@@ -168,6 +168,14 @@ export default function AppLayout() {
                     headerLeft: () => <BackButton onPress={() => router.navigate('/(app)/excuses')} />,
                 }}
             />
+            <Tabs.Screen
+                name="excuse-details"
+                options={{
+                    href: null,
+                    title: getExcuseFormText('title'),
+                    headerLeft: () => <BackButton onPress={() => router.navigate('/(app)/excuses')} />
+                }}
+            />
         </Tabs>
     );
 }

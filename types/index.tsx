@@ -158,6 +158,7 @@ export interface MobileExcuseAttendance {
     date: string;
     lessonHour: number;
     attendanceType: string;
+    attendanceTypeColorHex: string;
 }
 
 export interface MobileExcuse {
